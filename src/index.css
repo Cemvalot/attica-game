@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, sans-serif;
+
+  --color-eco-green: #22c55e;
+  --color-eco-green-dark: #15803d;
+  --color-eco-blue: #0ea5e9;
+  --color-eco-blue-dark: #0369a1;
+  --color-eco-yellow: #facc15;
+  --color-eco-orange: #fb923c;
+  --color-eco-sky: #bae6fd;
+  --color-eco-mint: #bbf7d0;
+
+  --radius-game: 1.5rem;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    @apply h-full w-full overflow-hidden;
+  }
+
+  body {
+    @apply font-sans antialiased text-emerald-950;
+    font-family: var(--font-sans);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer components {
+  /* Outer viewport: centers scaled kiosk canvas (tablet + TV from PC) */
+  .kiosk-root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100dvw;
+    height: 100dvh;
+    overflow: hidden;
+    background: linear-gradient(135deg, #166534 0%, #0c4a6e 50%, #14532d 100%);
+  }
+
+  .kiosk-shell {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 25px 80px rgba(0, 0, 0, 0.35);
+  }
+
+  .kiosk-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    container-type: size;
+    container-name: kiosk;
+  }
+
+  @media (orientation: landscape) and (min-width: 900px) {
+    .kiosk-root {
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(187, 247, 208, 0.15), transparent),
+        linear-gradient(135deg, #14532d 0%, #0c4a6e 45%, #134e4a 100%);
+    }
+
+    .kiosk-shell {
+      border-radius: 1rem;
+    }
+  }
+}
+
+@layer utilities {
+  .text-shadow-game {
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  .game-gradient-bg {
+    background: linear-gradient(
+      165deg,
+      #bbf7d0 0%,
+      #bae6fd 42%,
+      #fef9c3 100%
+    );
+  }
+
+  .illustration-frame img {
+    image-rendering: auto;
+  }
+
+  /* Slightly larger UI copy on big displays (TV / large monitor) */
+  @media (min-width: 1200px), (min-height: 900px) {
+    .kiosk-inner .text-\[10px\] {
+      font-size: 0.8125rem;
+      line-height: 1.2;
+    }
+  }
+}
