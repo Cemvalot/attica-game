@@ -3,7 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Timer, ThumbsDown, ThumbsUp, Zap } from 'lucide-react';
 import { APP_COPY, ECO_SPEED_GAME, scoreForEcoSpeed } from '../../data/games';
 import { useGameExit } from '../../hooks/useGameExit';
-import Illustration from '../../assets/illustrations/Illustration';
+import GameImage from '../../assets/images/GameImage';
+import HourglassIntro from '../HourglassIntro';
 import GameHeader from '../GameHeader';
 import ProgressBar from '../ProgressBar';
 import ResultScreen from '../ResultScreen';
@@ -174,13 +175,7 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
       <PageShell screenKey="eco-intro">
         <GameHeader title="Eco Speed Challenge" onHome={onHome} />
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-          <motion.div
-            animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-32"
-          >
-            <Illustration name="speed" />
-          </motion.div>
+          <HourglassIntro />
           <h3 className="font-display text-3xl font-extrabold text-sky-700">2 λεπτά!</h3>
           <p className="max-w-sm text-lg font-bold text-emerald-800">
             Απόφασε γρήγορα: καλό ή όχι για τον πλανήτη;
@@ -234,10 +229,11 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
                 )}
               >
                 {item && (
-                  <Illustration
-                    name={item.illustration}
-                    animate={false}
-                    className="!aspect-auto h-full min-h-[160px] w-full"
+                  <GameImage
+                    name={item.image}
+                    alt={item.label}
+                    fit="cover"
+                    className="h-full min-h-[160px] w-full"
                   />
                 )}
               </div>

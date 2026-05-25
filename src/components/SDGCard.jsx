@@ -12,6 +12,8 @@ export default function SDGCard({
   status = null,
   refCallback,
   compact = false,
+  mini = false,
+  fillCell = false,
   showLabel = true,
   className,
 }) {
@@ -37,7 +39,13 @@ export default function SDGCard({
       }
       className={cn(
         'relative flex h-full w-full flex-col items-center rounded-2xl border-4 text-center shadow-lg transition-colors',
-        compact ? 'min-h-[100px] gap-1 p-1.5' : 'gap-2 p-2',
+        fillCell
+          ? 'flex h-full min-h-0 flex-col items-center gap-0 border-[3px] p-1.5'
+          : mini
+            ? 'min-h-0 gap-0 border-2 p-1 rounded-xl'
+            : compact
+              ? 'min-h-[100px] gap-1 p-1.5'
+              : 'gap-2 p-2',
         selected && 'ring-4 ring-sky-300 ring-offset-2',
         status === 'correct' && 'border-emerald-400 bg-emerald-50 shadow-emerald-200',
         status === 'wrong' && 'border-rose-400 bg-rose-50',
@@ -48,11 +56,14 @@ export default function SDGCard({
     >
       <div
         className={cn(
-          'aspect-square w-full overflow-hidden rounded-xl',
-          compact ? 'max-w-none' : 'max-w-[88px]'
+          'overflow-hidden rounded-xl',
+          fillCell
+            ? 'flex min-h-0 w-full flex-1 items-center justify-center'
+            : 'aspect-square w-full',
+          mini ? 'max-w-none rounded-lg' : compact ? 'max-w-none' : 'max-w-[88px]'
         )}
       >
-        <SdgIcon sdgId={sdgId} alt={sdg.title} />
+        <SdgIcon sdgId={sdgId} alt={sdg.title} className={fillCell ? 'max-h-full max-w-full' : undefined} />
       </div>
       {showLabel && (
         <span
@@ -65,8 +76,13 @@ export default function SDGCard({
         </span>
       )}
       {selected && !readonly && (
-        <span className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full bg-sky-500 text-white shadow-md">
-          <Check className="size-3.5" strokeWidth={3} />
+        <span
+          className={cn(
+            'absolute flex items-center justify-center rounded-full bg-sky-500 text-white shadow-md',
+            mini ? '-right-0.5 -top-0.5 size-4' : '-right-1 -top-1 size-6'
+          )}
+        >
+          <Check className={cn(mini ? 'size-2.5' : 'size-3.5')} strokeWidth={3} />
         </span>
       )}
     </Comp>

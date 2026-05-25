@@ -8,7 +8,8 @@ import {
 } from '../../data/games';
 import { useGameExit } from '../../hooks/useGameExit';
 import { useConnectionLines } from '../../hooks/useConnectionLines';
-import Illustration from '../../assets/illustrations/Illustration';
+import GameImage from '../../assets/images/GameImage';
+import { sdgImageKey } from '../../assets/images/imageMap';
 import SDGCard from '../SDGCard';
 import GameHeader from '../GameHeader';
 import ProgressBar from '../ProgressBar';
@@ -282,15 +283,23 @@ export default function GameConnectSDG({ onComplete, onHome }) {
                   )}
                 >
                   <div className="min-h-0 flex-1 overflow-hidden rounded-xl">
-                    <Illustration
-                      name={pair.illustration}
-                      animate={false}
-                      className="!aspect-square h-full w-full"
+                    <GameImage
+                      name={sdgImageKey(pair.sdgId)}
+                      alt={pair.actionText}
+                      fit="cover"
+                      className="aspect-square h-full w-full"
                     />
                   </div>
-                  <span className="mt-1.5 line-clamp-3 text-xs font-extrabold leading-snug text-emerald-900">
-                    {pair.actionText}
-                  </span>
+                  <div className="mt-1.5 shrink-0 space-y-0.5 text-center">
+                    <span className="block line-clamp-2 text-xs font-extrabold leading-snug text-emerald-900">
+                      {pair.actionText}
+                    </span>
+                    {pair.actionDetail && (
+                      <span className="block line-clamp-2 text-[10px] font-bold leading-snug text-emerald-700/85">
+                        {pair.actionDetail}
+                      </span>
+                    )}
+                  </div>
                 </motion.button>
               </div>
             );

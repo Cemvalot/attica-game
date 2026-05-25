@@ -8,7 +8,8 @@ import {
   scoreForMatchLevel,
 } from '../../data/games';
 import { useGameExit } from '../../hooks/useGameExit';
-import Illustration from '../../assets/illustrations/Illustration';
+import GameImage from '../../assets/images/GameImage';
+import { sdgImageKey } from '../../assets/images/imageMap';
 import SDGCard from '../SDGCard';
 import GameHeader from '../GameHeader';
 import ProgressBar from '../ProgressBar';
@@ -38,6 +39,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
 
   const level = LEVELS[levelIndex];
   const scene = level.scene;
+  const requiredSdgCount = scene.correctSdgIds.length;
   const disabled = submitted || gameEnded || showResult;
 
   const toggleSdg = (id) => {
@@ -162,43 +164,44 @@ export default function GameMatchSDG({ onComplete, onHome }) {
 
       <div className="flex shrink-0 items-center justify-between gap-2">
         <p className="text-sm font-extrabold text-emerald-800 md:text-base">
-          Διάλεξε όλους τους σωστούς SDG
+          Διάλεξε {requiredSdgCount} σωστούς SDG
         </p>
         <Badge variant="sky" className="shrink-0 tabular-nums">
           {selected.length} επιλογές
         </Badge>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
         <motion.div
           key={level.id}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-          className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border-4 border-white bg-white/95 shadow-2xl"
+          className="flex min-h-0 flex-1 basis-0 flex-col overflow-hidden rounded-3xl border-4 border-white bg-white/95 shadow-2xl"
         >
-          <div className="flex min-h-0 flex-1 flex-col p-3">
-            <p className="mb-2 shrink-0 text-center font-display text-lg font-extrabold leading-tight text-emerald-900 md:text-xl">
+          <div className="flex min-h-0 flex-1 flex-col p-2.5">
+            <p className="mb-1 shrink-0 text-center font-display text-base font-extrabold leading-tight text-emerald-900 md:text-lg">
               {scene.label}
             </p>
+            {scene.sceneHint && (
+              <p className="mb-1.5 line-clamp-2 shrink-0 text-center text-xs font-bold leading-snug text-emerald-700/85">
+                {scene.sceneHint}
+              </p>
+            )}
             <div
               className="relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-gradient-to-b from-sky-50 to-emerald-50"
-              aria-label={scene.sceneHint}
-              title={scene.sceneHint}
             >
-              <Illustration
-                name={scene.illustration}
-                animate={false}
-                className="!aspect-auto h-full min-h-[180px] w-full"
+              <GameImage
+                name={sdgImageKey(scene.imageSdgId, 2)}
+                alt={scene.label}
+                fit="cover"
+                className="h-full w-full"
               />
             </div>
           </div>
         </motion.div>
 
-        <div
-          className="grid shrink-0 grid-cols-3 gap-2"
-          style={{ gridTemplateRows: 'repeat(2, minmax(0, 1fr))' }}
-        >
+        <div className="grid min-h-0 flex-1 basis-0 grid-cols-3 grid-rows-2 gap-2">
           {scene.optionSdgIds.map((id) => {
             const isSelected = selected.includes(id);
             let status = null;
@@ -214,6 +217,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
                 onClick={() => toggleSdg(id)}
                 status={status}
                 compact
+                fillCell
                 showLabel={false}
                 className={cn(
                   isSelected && !submitted && 'ring-4 ring-sky-400 ring-offset-1'

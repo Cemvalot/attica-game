@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, Home, Sparkles } from 'lucide-react';
 import { APP_COPY, MENU_GAMES } from '../data/games';
-import Illustration from '../assets/illustrations/Illustration';
+import GameImage from '../assets/images/GameImage';
 import PageShell from './PageShell';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -100,12 +100,13 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, totalRo
                     done && 'opacity-45 saturate-50'
                   )}
                 >
-                  <div className="flex min-h-0 flex-1 items-center justify-center">
-                    <div className="aspect-square h-full max-h-full w-full max-w-full overflow-hidden rounded-2xl border-2 border-white shadow-md">
-                      <Illustration
-                        name={game.illustration}
-                        animate={false}
-                        className="!aspect-square h-full w-full"
+                  <div className="flex min-h-0 flex-1 items-stretch justify-center">
+                    <div className="flex h-full w-full min-h-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-white bg-gradient-to-b from-sky-50 to-emerald-50 shadow-md">
+                      <GameImage
+                        name={game.image}
+                        alt={game.title}
+                        fit="contain"
+                        className="h-full w-full max-h-full"
                       />
                     </div>
                   </div>

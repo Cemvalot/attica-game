@@ -37,7 +37,7 @@ Deploy on Vercel: preset **Vite**, output `dist`.
 src/
   App.jsx
   data/games.js, sdgs.js
-  assets/illustrations/   # flat SVG React illustrations
+  assets/images/          # game photos (see images/README.md)
   components/
     HomeScreen, GameMenu, FinalScreen, …
     games/GameConnectSDG, GameMatchSDG, GameEcoSpeed
@@ -46,7 +46,7 @@ src/
 
 ## Customize
 
-- Replace SVG components in `assets/illustrations/Illustrations.jsx` with WEBP/SVG files in `public/`  
+- Add JPG/PNG/WebP files under `src/assets/images/` (names in `imageMap.js`)  
 - Add official UN SDG icons under `public/sdg/`  
 - Edit copy and game data in `src/data/games.js`  
 
