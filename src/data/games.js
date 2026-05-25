@@ -14,7 +14,6 @@ export const APP_COPY = {
   instructionsButton: 'Οδηγίες',
   menuTitle: 'Διάλεξε παιχνίδι',
   home: 'Αρχική',
-  replay: 'Παίξε ξανά',
   check: 'Υποβολή',
   retryHint: 'Έχεις ακόμα 1 προσπάθεια.',
   continue: 'Συνέχεια',
@@ -24,7 +23,6 @@ export const APP_COPY = {
   wrong: 'Λάθος!',
   good: 'Καλό για τον πλανήτη',
   bad: 'Όχι καλό για τον πλανήτη',
-  playAgain: 'Παίξε ξανά',
   finalTitle: 'Μπράβο!',
   finalSubtitle: 'Ολοκλήρωσες όλα τα παιχνίδια!',
 };
@@ -65,6 +63,12 @@ export function scoreForGame(correct, total) {
 export function scoreForConnectLevel(correct, total = 3) {
   if (!total) return 0;
   return (correct / total) * SCORE_PER_QUESTION;
+}
+
+/** Game 2: one scene per level → share of 33% split evenly across levels. */
+export function scoreForMatchLevel(correct, levelCount) {
+  if (!levelCount) return 0;
+  return (correct / 1) * (SCORE_PER_GAME / levelCount);
 }
 
 /** Game 3: speed challenge contributes up to 33% of total. */
@@ -192,36 +196,57 @@ export const CONNECT_GAME = {
   ],
 };
 
-// —— Game 2: Match SDG to scene ——
+// —— Game 2: Match SDG to whole scene (3 levels × 1 scene) ——
 export const MATCH_GAME = {
   id: 'matchSDG',
-  scenes: [
+  levelsPerGame: 3,
+  levels: [
     {
       id: 1,
-      illustration: 'planting-tree',
-      label: 'Παιδιά φυτεύουν και ποτίζουν δέντρα',
-      correctSdgIds: [13, 15],
-      optionSdgIds: [3, 6, 11, 13, 14, 15],
-      feedbackCorrect: 'Μπράβο! Τα δέντρα σχετίζονται με το κλίμα και τη ζωή στη στεριά.',
-      feedbackWrong: 'Δοκίμασε ξανά! Σκέψου κλίμα και φύση στη στεριά.',
+      title: 'Επίπεδο 1',
+      subtitle: 'Πράσινο σχολείο',
+      scene: {
+        illustration: 'lights-off',
+        label: 'Ένα πιο πράσινο σχολείο',
+        sceneHint:
+          'Παιδιά σε πράσινο σχολείο με ηλιακά πάνελ, κήπο και ποδήλατα',
+        correctSdgIds: [7, 11, 13],
+        optionSdgIds: [4, 6, 7, 11, 13, 15],
+        feedbackCorrect:
+          'Μπράβο! Ηλιακή ενέργεια, πράσινο σχολείο και κήπος σχετίζονται με ενέργεια, βιώσιμες πόλεις και το κλίμα.',
+        feedbackWrong: 'Σκέψου ενέργεια, βιώσιμες πόλεις και δράση για το κλίμα.',
+      },
     },
     {
       id: 2,
-      illustration: 'cycling-kids',
-      label: 'Παιδιά πηγαίνουν με ποδήλατο',
-      correctSdgIds: [11, 3],
-      optionSdgIds: [3, 7, 11, 13, 14, 15],
-      feedbackCorrect: 'Σωστά! Το ποδήλατο βοηθά την υγεία και τις βιώσιμες πόλεις.',
-      feedbackWrong: 'Σκέψου υγεία και βιώσιμες μετακινήσεις.',
+      title: 'Επίπεδο 2',
+      subtitle: 'Υγιεινή διατροφή',
+      scene: {
+        illustration: 'save-earth',
+        label: 'Υγιεινό φαγητό για όλους',
+        sceneHint: 'Παιδιά μοιράζονται υγιεινό φαγητό σε σχολικό τραπέζι',
+        correctSdgIds: [2, 3, 10],
+        optionSdgIds: [1, 2, 3, 6, 10, 11],
+        feedbackCorrect:
+          'Σωστά! Η υγιεινή διατροφή συνδέεται με την πείνα, την υγεία και τις ανισότητες.',
+        feedbackWrong: 'Σκέψου πείνα, υγεία και ίσες ευκαιρίες για όλους.',
+      },
     },
     {
       id: 3,
-      illustration: 'beach-cleanup',
-      label: 'Παιδιά καθαρίζουν την παραλία',
-      correctSdgIds: [14],
-      optionSdgIds: [6, 7, 11, 13, 14, 15],
-      feedbackCorrect: 'Τέλεια! Η καθαρή παραλία σχετίζεται με τη ζωή στο νερό.',
-      feedbackWrong: 'Η θάλασσα σχετίζεται με τον στόχο «Ζωή στο νερό».',
+      title: 'Επίπεδο 3',
+      subtitle: 'Συνεργασία & ισότητα',
+      scene: {
+        illustration: 'cycling-kids',
+        label: 'Όλοι μαζί μπορούμε',
+        sceneHint:
+          'Παιδιά διαφορετικών χωρών παίζουν και συνεργάζονται μαζί',
+        correctSdgIds: [5, 10, 16],
+        optionSdgIds: [3, 5, 7, 10, 13, 16],
+        feedbackCorrect:
+          'Τέλεια! Η συνεργασία όλων συνδέεται με ισότητα, λιγότερες ανισότητες και ειρήνη.',
+        feedbackWrong: 'Σκέψου ισότητα, ανισότητες και ειρήνη.',
+      },
     },
   ],
 };
@@ -271,8 +296,8 @@ export const INSTRUCTIONS = [
   {
     title: 'Ποιος SDG ταιριάζει;',
     lines: [
-      'Κοίτα την εικόνα.',
-      'Διάλεξε όλους τους σωστούς SDG.',
+      '3 επίπεδα — κάθε σκηνή είναι ολόκληρη εικόνα (όχι μία δράση).',
+      'Κοίτα την εικόνα και διάλεξε όλους τους σωστούς SDG.',
       'Χωρίς επιπλέον επιλογές!',
       'Πάτα «Υποβολή» — σε λάθος έχεις 1 προσπάθεια ακόμα.',
     ],

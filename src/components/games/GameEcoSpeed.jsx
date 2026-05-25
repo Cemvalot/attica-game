@@ -155,15 +155,6 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
     endCurrentGame(resultData);
   }, [endCurrentGame, resultData]);
 
-  const handleReplay = () => {
-    endedRef.current = false;
-    correctRef.current = 0;
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
-    setPhase('intro');
-    setShowResult(false);
-  };
-
   const item = queue[index];
   const disabled = phase !== 'playing' || !!flash || endedRef.current || gameEnded;
 
@@ -208,7 +199,6 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
       <GameHeader
         title="Eco Speed Challenge"
         onHome={onHome}
-        onReplay={handleReplay}
         right={
           <Badge
             variant="default"

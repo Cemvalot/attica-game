@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
 import { motion } from 'framer-motion';
-import { Award, RotateCcw, Trophy } from 'lucide-react';
+import { Award, Home, Trophy } from 'lucide-react';
 import { APP_COPY, BRAND_NAME } from '../data/games';
 import { KIOSK_HEIGHT, KIOSK_WIDTH } from '../constants/kiosk';
 import PageShell from './PageShell';
@@ -29,7 +29,7 @@ const badgeMeta = {
   },
 };
 
-export default function FinalScreen({ roundedScore, badge, onPlayAgain }) {
+export default function FinalScreen({ roundedScore, badge, onHome }) {
   const [displayScore, setDisplayScore] = useState(0);
   useEffect(() => {
     const start = performance.now();
@@ -93,9 +93,9 @@ export default function FinalScreen({ roundedScore, badge, onPlayAgain }) {
           {badge?.label ?? meta.label}
         </Badge>
 
-        <Button size="xl" variant="sun" onClick={onPlayAgain} className="gap-2">
-          <RotateCcw className="size-6" />
-          {APP_COPY.playAgain}
+        <Button size="xl" variant="sky" onClick={onHome} className="gap-2">
+          <Home className="size-6" />
+          {APP_COPY.home}
         </Button>
       </motion.div>
     </PageShell>

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, Home, Sparkles } from 'lucide-react';
-import { APP_COPY, SCORE_PER_GAME, MENU_GAMES } from '../data/games';
+import { APP_COPY, MENU_GAMES } from '../data/games';
 import Illustration from '../assets/illustrations/Illustration';
 import PageShell from './PageShell';
 import { Button } from './ui/button';
@@ -18,7 +18,7 @@ const cardVariants = {
   }),
 };
 
-export default function GameMenu({ onSelectGame, onHome, completedGames, gameScores, totalRounded }) {
+export default function GameMenu({ onSelectGame, onHome, completedGames, totalRounded }) {
   const doneCount = completedGames.length;
   const totalGames = MENU_GAMES.length;
   const progressPct = (doneCount / totalGames) * 100;
@@ -58,33 +58,48 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, gameSco
       >
         {MENU_GAMES.map((game, i) => {
           const done = completedGames.includes(game.id);
-          const pct = gameScores[game.id]
-            ? Math.round((gameScores[game.id] / SCORE_PER_GAME) * 100)
-            : 0;
 
           return (
-            <motion.button
+            <motion.div
               key={game.id}
-              type="button"
               custom={i}
               variants={cardVariants}
               initial="hidden"
               animate="show"
-              whileTap={{ scale: 0.97 }}
-              whileHover={{ scale: 1.02 }}
-              onClick={() => onSelectGame(game.id)}
-              className="flex h-full min-h-0 w-full text-left"
+              whileTap={done ? undefined : { scale: 0.97 }}
+              whileHover={done ? undefined : { scale: 1.02 }}
+              className={cn(
+                'relative flex h-full min-h-0 w-full',
+                done ? 'cursor-default' : 'cursor-pointer'
+              )}
+              role={done ? undefined : 'button'}
+              tabIndex={done ? -1 : 0}
+              aria-disabled={done || undefined}
+              onClick={() => {
+                if (!done) onSelectGame(game.id);
+              }}
+              onKeyDown={(e) => {
+                if (!done && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  onSelectGame(game.id);
+                }
+              }}
             >
               <Card
                 className={cn(
-                  'flex h-full w-full flex-col overflow-hidden border-4 transition-shadow',
+                  'relative flex h-full w-full flex-col overflow-hidden border-4 transition-shadow',
                   done
-                    ? 'border-emerald-300 bg-gradient-to-br from-white to-emerald-50 shadow-emerald-200/50'
+                    ? 'border-emerald-300/80 bg-gradient-to-br from-white/60 to-emerald-50/50 shadow-emerald-200/30'
                     : 'border-white bg-gradient-to-br from-white to-sky-50 shadow-xl hover:shadow-2xl'
                 )}
                 style={{ boxShadow: `0 8px 0 ${done ? '#86efac' : '#7dd3fc'}40` }}
               >
-                <CardContent className="flex h-full min-h-0 flex-col gap-2 p-3">
+                <CardContent
+                  className={cn(
+                    'flex h-full min-h-0 flex-col gap-2 p-3 transition-opacity',
+                    done && 'opacity-45 saturate-50'
+                  )}
+                >
                   <div className="flex min-h-0 flex-1 items-center justify-center">
                     <div className="aspect-square h-full max-h-full w-full max-w-full overflow-hidden rounded-2xl border-2 border-white shadow-md">
                       <Illustration
@@ -101,16 +116,22 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, gameSco
                     <p className="mt-0.5 line-clamp-2 text-xs font-bold text-emerald-700/80 md:text-sm">
                       {game.subtitle}
                     </p>
-                    {done && (
-                      <span className="mt-1 inline-flex items-center gap-1 text-xs font-extrabold text-emerald-600 md:text-sm">
-                        <CheckCircle2 className="size-4 shrink-0" />
-                        Ολοκληρώθηκε · {pct}%
-                      </span>
-                    )}
                   </div>
                 </CardContent>
+
+                {done && (
+                  <div
+                    className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-[inherit] bg-white/55 backdrop-blur-[2px]"
+                    aria-hidden
+                  >
+                    <CheckCircle2 className="size-10 text-emerald-600 drop-shadow-sm md:size-12" />
+                    <span className="rounded-full bg-emerald-600/90 px-4 py-1.5 font-display text-sm font-extrabold text-white shadow-md md:text-base">
+                      Ολοκληρώθηκε
+                    </span>
+                  </div>
+                )}
               </Card>
-            </motion.button>
+            </motion.div>
           );
         })}
       </div>

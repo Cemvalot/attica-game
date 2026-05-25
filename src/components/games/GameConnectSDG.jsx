@@ -187,22 +187,6 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     endCurrentGame(resultData);
   }, [endCurrentGame, resultData]);
 
-  const handleReplay = () => {
-    setLevelIndex(0);
-    setLevelScores([]);
-    setLevelCorrectCounts([]);
-    setSelectedSdg(null);
-    setConnections([]);
-    setSubmitted(false);
-    setLineStatuses({});
-    setFeedback(null);
-    setPendingLevel(null);
-    setShowResult(false);
-    setResultData(null);
-    setShuffleKey((k) => k + 1);
-    setCanRetry(true);
-  };
-
   const actionCards = useMemo(() => {
     const shuffled = [...pairs];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -228,7 +212,6 @@ export default function GameConnectSDG({ onComplete, onHome }) {
       <GameHeader
         title="Σύνδεσε τον SDG με τη δράση"
         onHome={onHome}
-        onReplay={handleReplay}
         right={
           <Badge variant="sky" className="tabular-nums">
             {level.title}

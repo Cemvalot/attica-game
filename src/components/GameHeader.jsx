@@ -1,7 +1,7 @@
-import { Home, RotateCcw } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Button } from './ui/button';
 
-export default function GameHeader({ title, onHome, onReplay, right }) {
+export default function GameHeader({ title, onHome, right }) {
   return (
     <header className="flex shrink-0 items-center gap-2">
       <Button variant="icon" size="icon" onClick={onHome} aria-label="Αρχική">
@@ -10,14 +10,7 @@ export default function GameHeader({ title, onHome, onReplay, right }) {
       <h2 className="flex-1 text-center font-display text-lg font-extrabold leading-tight text-emerald-900 md:text-xl">
         {title}
       </h2>
-      <div className="flex items-center gap-2">
-        {right}
-        {onReplay && (
-          <Button variant="ghost" size="icon" onClick={onReplay} aria-label="Παίξε ξανά">
-            <RotateCcw className="size-5" />
-          </Button>
-        )}
-      </div>
+      {right ? <div className="flex items-center gap-2">{right}</div> : <div className="size-10 shrink-0" />}
     </header>
   );
 }

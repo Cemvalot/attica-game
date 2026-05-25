@@ -79,8 +79,6 @@ export default function App() {
     });
   }, []);
 
-  const handlePlayAgain = () => resetAll();
-
   const renderScreen = () => {
     switch (screen) {
       case SCREENS.home:
@@ -96,7 +94,6 @@ export default function App() {
             onSelectGame={(id) => setScreen(SCREENS[id] ?? SCREENS.menu)}
             onHome={goHome}
             completedGames={completedGames}
-            gameScores={gameScores}
             totalRounded={totalRounded}
           />
         );
@@ -126,7 +123,7 @@ export default function App() {
           <FinalScreen
             roundedScore={totalRounded}
             badge={finalBadge}
-            onPlayAgain={handlePlayAgain}
+            onHome={resetAll}
           />
         );
       default:
