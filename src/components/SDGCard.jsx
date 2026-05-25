@@ -21,8 +21,8 @@ export default function SDGCard({
   const Comp = readonly ? motion.div : motion.button;
 
   return (
+    <div ref={refCallback} className="h-full w-full">
     <Comp
-      ref={refCallback}
       type={readonly ? undefined : 'button'}
       onClick={readonly ? undefined : onClick}
       disabled={status != null && !readonly}
@@ -36,7 +36,7 @@ export default function SDGCard({
             : {}
       }
       className={cn(
-        'relative flex w-full flex-col items-center rounded-2xl border-4 text-center shadow-lg transition-colors',
+        'relative flex h-full w-full flex-col items-center rounded-2xl border-4 text-center shadow-lg transition-colors',
         compact ? 'min-h-[100px] gap-1 p-1.5' : 'gap-2 p-2',
         selected && 'ring-4 ring-sky-300 ring-offset-2',
         status === 'correct' && 'border-emerald-400 bg-emerald-50 shadow-emerald-200',
@@ -70,5 +70,6 @@ export default function SDGCard({
         </span>
       )}
     </Comp>
+    </div>
   );
 }

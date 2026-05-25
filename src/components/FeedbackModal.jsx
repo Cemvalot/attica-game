@@ -52,7 +52,7 @@ export default function FeedbackModal({
                 </p>
                 <p className="mt-3 text-lg font-bold text-emerald-800">{message}</p>
               </>
-            ) : message === APP_COPY.tryAgain ? (
+            ) : message === APP_COPY.tryAgain || message === APP_COPY.advanceScene ? (
               <p className="font-display text-3xl font-extrabold text-rose-600">{message}</p>
             ) : (
               <>

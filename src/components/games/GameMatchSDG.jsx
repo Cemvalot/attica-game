@@ -53,7 +53,11 @@ export default function GameMatchSDG({ onComplete, onHome }) {
 
     setFeedback({
       correct: ok,
-      message: ok ? scene.feedbackCorrect : APP_COPY.tryAgain,
+      message: ok
+        ? scene.feedbackCorrect
+        : canRetry
+          ? APP_COPY.tryAgain
+          : APP_COPY.advanceScene,
     });
   };
 

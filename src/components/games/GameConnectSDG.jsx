@@ -65,15 +65,20 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     actionRefs
   );
 
+  const scheduleMeasure = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(remeasure);
+    });
+  }, [remeasure]);
+
   useEffect(() => {
     sdgRefs.current = {};
     actionRefs.current = {};
   }, [levelIndex, shuffleKey]);
 
   useEffect(() => {
-    const id = requestAnimationFrame(remeasure);
-    return () => cancelAnimationFrame(id);
-  }, [connections, lineStatuses, remeasure, levelIndex, shuffleKey]);
+    scheduleMeasure();
+  }, [connections, lineStatuses, levelIndex, shuffleKey, scheduleMeasure]);
 
   const connectedCount = connections.length;
   const disabled = submitted || gameEnded || showResult;
@@ -81,10 +86,12 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   const setSdgRef = (id) => (el) => {
     if (el) sdgRefs.current[id] = el;
     else delete sdgRefs.current[id];
+    scheduleMeasure();
   };
   const setActionRef = (id) => (el) => {
     if (el) actionRefs.current[id] = el;
     else delete actionRefs.current[id];
+    scheduleMeasure();
   };
 
   const handleSdgTap = (sdgId) => {
@@ -99,7 +106,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
       return [...filtered, { sdgId: selectedSdg, actionId }];
     });
     setSelectedSdg(null);
-    requestAnimationFrame(() => requestAnimationFrame(remeasure));
+    scheduleMeasure();
   };
 
   const handleCheck = () => {
@@ -242,9 +249,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
         ref={containerRef}
         className="relative flex min-h-0 flex-1 flex-col justify-between gap-4 overflow-visible py-1 sm:gap-6"
       >
-        <ConnectionOverlay lines={lines} width={size.width} height={size.height} />
-
-        <div className="z-10 grid grid-cols-3 gap-3">
+        <div className="relative z-10 grid grid-cols-3 gap-3">
           {pairs.map((pair) => {
             const conn = connections.find((c) => c.sdgId === pair.sdgId);
             const status = submitted
@@ -267,43 +272,49 @@ export default function GameConnectSDG({ onComplete, onHome }) {
           })}
         </div>
 
-        <div className="z-10 grid grid-cols-3 gap-3">
+        <div className="relative z-10 grid grid-cols-3 gap-3">
           {actionCards.map((pair) => {
             const conn = connections.find((c) => c.actionId === pair.actionId);
             const status = conn
               ? lineStatuses[`${conn.sdgId}-${conn.actionId}`] || null
               : null;
             return (
-              <motion.button
+              <div
                 key={`${level.id}-${pair.actionId}`}
                 ref={setActionRef(pair.actionId)}
-                type="button"
-                whileTap={{ scale: 0.96 }}
-                whileHover={disabled ? undefined : { scale: 1.03 }}
-                onClick={() => handleActionTap(pair.actionId)}
-                disabled={disabled}
-                className={cn(
-                  'flex h-full min-h-[120px] flex-col overflow-hidden rounded-2xl border-4 bg-white p-2 text-center shadow-xl transition-colors',
-                  conn && 'border-sky-400 ring-2 ring-sky-200',
-                  status === 'correct' && 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-300',
-                  status === 'wrong' && 'border-rose-500 bg-rose-50 ring-4 ring-rose-200',
-                  selectedSdg && !disabled && !conn && 'border-amber-400 ring-4 ring-amber-200'
-                )}
+                className="h-full w-full"
               >
-                <div className="min-h-0 flex-1 overflow-hidden rounded-xl">
-                  <Illustration
-                    name={pair.illustration}
-                    animate={false}
-                    className="!aspect-square h-full w-full"
-                  />
-                </div>
-                <span className="mt-1.5 line-clamp-3 text-xs font-extrabold leading-snug text-emerald-900">
-                  {pair.actionText}
-                </span>
-              </motion.button>
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.96 }}
+                  whileHover={disabled ? undefined : { scale: 1.03 }}
+                  onClick={() => handleActionTap(pair.actionId)}
+                  disabled={disabled}
+                  className={cn(
+                    'flex h-full min-h-[120px] w-full flex-col overflow-hidden rounded-2xl border-4 bg-white p-2 text-center shadow-xl transition-colors',
+                    conn && 'border-sky-400 ring-2 ring-sky-200',
+                    status === 'correct' && 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-300',
+                    status === 'wrong' && 'border-rose-500 bg-rose-50 ring-4 ring-rose-200',
+                    selectedSdg && !disabled && !conn && 'border-amber-400 ring-4 ring-amber-200'
+                  )}
+                >
+                  <div className="min-h-0 flex-1 overflow-hidden rounded-xl">
+                    <Illustration
+                      name={pair.illustration}
+                      animate={false}
+                      className="!aspect-square h-full w-full"
+                    />
+                  </div>
+                  <span className="mt-1.5 line-clamp-3 text-xs font-extrabold leading-snug text-emerald-900">
+                    {pair.actionText}
+                  </span>
+                </motion.button>
+              </div>
             );
           })}
         </div>
+
+        <ConnectionOverlay lines={lines} width={size.width} height={size.height} />
       </div>
 
       <Button

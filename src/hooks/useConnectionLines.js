@@ -1,21 +1,36 @@
 import { useCallback, useEffect, useState } from 'react';
 
-/** Map screen pixels (after CSS transform scale) → layout coords inside container */
-function getLayoutScale(container) {
-  const rect = container.getBoundingClientRect();
-  if (!rect.width || !container.offsetWidth) return 1;
-  return container.offsetWidth / rect.width;
-}
-
+/** Position relative to container using layout offsets (works with CSS zoom). */
 function pointInContainer(container, el, anchor) {
-  const scale = getLayoutScale(container);
-  const cRect = container.getBoundingClientRect();
-  const eRect = el.getBoundingClientRect();
-  const cx = (eRect.left + eRect.width / 2 - cRect.left) * scale;
-  if (anchor === 'bottom') {
-    return { x: cx, y: (eRect.bottom - cRect.top) * scale };
+  if (!container || !el || !container.contains(el)) return null;
+
+  let top = 0;
+  let left = 0;
+  let node = el;
+
+  while (node && node !== container) {
+    top += node.offsetTop;
+    left += node.offsetLeft;
+    node = node.offsetParent;
   }
-  return { x: cx, y: (eRect.top - cRect.top) * scale };
+
+  if (node !== container) {
+    const cRect = container.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    if (!cRect.width || !cRect.height) return null;
+    const scaleX = container.offsetWidth / cRect.width;
+    const scaleY = container.offsetHeight / cRect.height;
+    const x = (eRect.left + eRect.width / 2 - cRect.left) * scaleX;
+    const y =
+      anchor === 'bottom'
+        ? (eRect.bottom - cRect.top) * scaleY
+        : (eRect.top - cRect.top) * scaleY;
+    return { x, y };
+  }
+
+  const x = left + el.offsetWidth / 2;
+  const y = anchor === 'bottom' ? top + el.offsetHeight : top;
+  return { x, y };
 }
 
 export function useConnectionLines(containerRef, connections, sdgRefs, actionRefs) {
@@ -26,7 +41,11 @@ export function useConnectionLines(containerRef, connections, sdgRefs, actionRef
     const container = containerRef.current;
     if (!container) return;
 
-    setSize({ width: container.offsetWidth, height: container.offsetHeight });
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    if (!width || !height) return;
+
+    setSize({ width, height });
 
     const next = connections
       .map((conn) => {
@@ -36,6 +55,8 @@ export function useConnectionLines(containerRef, connections, sdgRefs, actionRef
 
         const start = pointInContainer(container, sdgEl, 'bottom');
         const end = pointInContainer(container, actEl, 'top');
+        if (!start || !end) return null;
+
         return {
           id: `${conn.sdgId}-${conn.actionId}`,
           x1: start.x,
@@ -52,19 +73,29 @@ export function useConnectionLines(containerRef, connections, sdgRefs, actionRef
 
   useEffect(() => {
     measure();
-    const ro = new ResizeObserver(measure);
+
+    const ro = new ResizeObserver(() => measure());
     const container = containerRef.current;
+
     if (container) {
       ro.observe(container);
+    }
+
+    const observeRefs = () => {
       Object.values(sdgRefs.current).forEach((el) => el && ro.observe(el));
       Object.values(actionRefs.current).forEach((el) => el && ro.observe(el));
-    }
+    };
+
+    observeRefs();
+    const t = requestAnimationFrame(observeRefs);
+
     window.addEventListener('resize', measure);
     return () => {
+      cancelAnimationFrame(t);
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [measure, containerRef, connections, sdgRefs, actionRefs]);
+  }, [measure, containerRef, connections]);
 
   return { lines, size, remeasure: measure };
 }

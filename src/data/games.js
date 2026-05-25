@@ -19,6 +19,7 @@ export const APP_COPY = {
   retryHint: 'Έχεις ακόμα 1 προσπάθεια.',
   continue: 'Συνέχεια',
   tryAgain: 'Δοκίμασε ξανά',
+  advanceScene: 'Πάμε στην επόμενη σκηνή!',
   correct: 'Σωστό!',
   wrong: 'Λάθος!',
   good: 'Καλό για τον πλανήτη',
