@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Timer, ThumbsDown, ThumbsUp, Zap } from 'lucide-react';
 import { APP_COPY, ECO_SPEED_GAME, scoreForEcoSpeed } from '../../data/games';
 import { useGameExit } from '../../hooks/useGameExit';
-import GameImage from '../../assets/images/GameImage';
+import GameImage, { preloadGameImage } from '../../assets/images/GameImage';
 import HourglassIntro from '../HourglassIntro';
 import GameHeader from '../GameHeader';
 import ProgressBar from '../ProgressBar';
@@ -52,6 +52,10 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
 
   const { endCurrentGame, gameEnded } = useGameExit((result) => onComplete(result));
 
+  useEffect(() => {
+    void Promise.all(ITEMS.map((entry) => preloadGameImage(entry.image)));
+  }, []);
+
   const finishGame = useCallback(() => {
     if (endedRef.current) return;
     endedRef.current = true;
@@ -68,7 +72,8 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
 
   const startGame = () => {
     endedRef.current = false;
-    setQueue(shuffle(ITEMS));
+    const shuffled = shuffle(ITEMS);
+    setQueue(shuffled);
     setIndex(0);
     setTimeLeft(DURATION);
     setCorrect(0);
@@ -78,7 +83,14 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
     setShowResult(false);
     setResultData(null);
     setPhase('playing');
+    void Promise.all(shuffled.map((entry) => preloadGameImage(entry.image)));
   };
+
+  useEffect(() => {
+    if (phase !== 'playing' || endedRef.current) return;
+    const next = queue[index + 1];
+    if (next) void preloadGameImage(next.image);
+  }, [phase, index, queue]);
 
   useEffect(() => {
     if (phase !== 'playing' || endedRef.current) return;
@@ -190,7 +202,7 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
   }
 
   return (
-    <PageShell screenKey={`eco-${index}`} className="relative gap-2 overflow-hidden">
+    <PageShell screenKey="ecoSpeed" className="relative gap-2 overflow-hidden">
       <GameHeader
         title="Eco Speed Challenge"
         onHome={onHome}
@@ -211,40 +223,51 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
       <ProgressBar current={answered} total={TOTAL} label="Απαντήσεις" />
 
       <div className="relative flex min-h-0 flex-1 flex-col gap-2">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={item?.id}
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-            className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border-4 border-white bg-white/95 shadow-2xl"
-          >
-            <div className="flex min-h-0 flex-1 flex-col p-3">
-              <div
-                className={cn(
-                  'relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-gradient-to-b from-sky-50 to-emerald-50 transition-shadow',
-                  flash === 'correct' && 'ring-4 ring-emerald-400',
-                  flash === 'wrong' && 'ring-4 ring-rose-400'
-                )}
-              >
-                {item && (
-                  <GameImage
-                    name={item.image}
-                    alt={item.label}
-                    fit="cover"
-                    className="h-full min-h-[160px] w-full"
-                  />
-                )}
-              </div>
-              {item && (
-                <p className="mt-2 shrink-0 px-1 text-center font-display text-xl font-extrabold leading-tight text-emerald-900 md:text-2xl">
-                  {item.label}
-                </p>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border-4 border-white bg-white/95 shadow-2xl">
+          <div className="relative flex min-h-0 flex-1 flex-col p-3">
+            <div
+              className={cn(
+                'relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-gradient-to-b from-sky-50 to-emerald-50 transition-shadow',
+                flash === 'correct' && 'ring-4 ring-emerald-400',
+                flash === 'wrong' && 'ring-4 ring-rose-400'
               )}
+            >
+              <AnimatePresence mode="sync" initial={false}>
+                {item && (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.12, ease: 'easeOut' }}
+                    className="absolute inset-0"
+                  >
+                    <GameImage
+                      name={item.image}
+                      alt={item.label}
+                      fit="cover"
+                      className="h-full min-h-[160px] w-full"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </motion.div>
-        </AnimatePresence>
+            <AnimatePresence mode="sync" initial={false}>
+              {item && (
+                <motion.p
+                  key={item.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12, ease: 'easeOut' }}
+                  className="mt-2 shrink-0 px-1 text-center font-display text-xl font-extrabold leading-tight text-emerald-900 md:text-2xl"
+                >
+                  {item.label}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
 
         <AnimatePresence>
           {flash === 'correct' && (

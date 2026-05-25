@@ -37,6 +37,7 @@ export default function GameImage({
   className,
   animate = false,
   fit = 'cover',
+  priority = false,
   onLoad,
 }) {
   const [src, setSrc] = useState(() => getGameImageUrl(name));
@@ -88,8 +89,9 @@ export default function GameImage({
           src={src}
           alt={alt}
           className={imgClass}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
           decoding="async"
+          fetchPriority={priority ? 'high' : 'auto'}
           onLoad={onLoad}
         />
       </div>

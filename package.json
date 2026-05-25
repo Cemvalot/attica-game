@@ -9,7 +9,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview --host",
-    "compress:images": "bash scripts/compress-images.sh"
+    "compress:images": "bash scripts/compress-images.sh",
+    "compress:images:menu": "bash scripts/compress-images.sh menu"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

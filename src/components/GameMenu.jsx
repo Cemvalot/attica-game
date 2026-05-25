@@ -106,6 +106,7 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, totalRo
                         name={game.image}
                         alt={game.title}
                         fit="contain"
+                        priority
                         className="h-full w-full max-h-full"
                       />
                     </div>
