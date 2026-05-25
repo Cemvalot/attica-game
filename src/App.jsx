@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
-import { useInactivity } from './hooks/useInactivity';
 import {
   GAME_IDS,
   roundTotalScore,
@@ -56,8 +55,6 @@ export default function App() {
     setGameScores(INITIAL_SCORES);
     setInstructionsOpen(false);
   }, []);
-
-  useInactivity(resetAll, 60000);
 
   const goHome = () => setScreen(SCREENS.home);
   const goMenu = () => setScreen(SCREENS.menu);

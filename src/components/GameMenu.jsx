@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, Home, Sparkles } from 'lucide-react';
-import { APP_COPY, GAME_WEIGHT, MENU_GAMES } from '../data/games';
+import { APP_COPY, SCORE_PER_GAME, MENU_GAMES } from '../data/games';
 import Illustration from '../assets/illustrations/Illustration';
 import PageShell from './PageShell';
 import { Button } from './ui/button';
@@ -59,7 +59,7 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, gameSco
         {MENU_GAMES.map((game, i) => {
           const done = completedGames.includes(game.id);
           const pct = gameScores[game.id]
-            ? Math.round((gameScores[game.id] / GAME_WEIGHT) * 100)
+            ? Math.round((gameScores[game.id] / SCORE_PER_GAME) * 100)
             : 0;
 
           return (
@@ -118,7 +118,7 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, gameSco
       <p className="shrink-0 flex items-center justify-center gap-2 py-1 text-center text-xs font-bold text-emerald-800/80 md:text-sm">
         <Sparkles className="size-4 text-amber-500" />
         {doneCount < totalGames
-          ? `Απομένουν ${totalGames - doneCount} παιχνίδια για το μεγάλο βραβείο!`
+          ? `Απομένουν ${totalGames - doneCount} παιχνίδια — συνέχισε την περιπέτεια!`
           : 'Όλα έτοιμα — δες το τελικό αποτέλεσμα!'}
       </p>
     </PageShell>

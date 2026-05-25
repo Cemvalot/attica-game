@@ -11,6 +11,8 @@ export const ILLUSTRATION_MAP = {
   'car-pollution': 'Air pollution-rafiki.svg',
   'running-tap': 'Water drop-bro.svg',
   bicycle: 'bike travellers-amico.svg',
+  'city-bus': 'city bus-bro.svg',
+  forest: 'Forest-amico.svg',
   connect: 'Save the Earth-rafiki.svg',
   match: 'Forest-amico.svg',
   speed: 'city bus-bro.svg',

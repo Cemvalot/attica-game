@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { RotateCcw, Timer, ThumbsDown, ThumbsUp, XCircle, Zap } from 'lucide-react';
-import { APP_COPY, ECO_SPEED_GAME, scoreForGame } from '../../data/games';
+import { Timer, ThumbsDown, ThumbsUp, Zap } from 'lucide-react';
+import { APP_COPY, ECO_SPEED_GAME, scoreForEcoSpeed } from '../../data/games';
 import { useGameExit } from '../../hooks/useGameExit';
 import Illustration from '../../assets/illustrations/Illustration';
 import GameHeader from '../GameHeader';
@@ -41,8 +41,6 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
   const [correct, setCorrect] = useState(0);
   const [answered, setAnswered] = useState(0);
   const [flash, setFlash] = useState(null);
-  const [needsRetry, setNeedsRetry] = useState(false);
-  const [canRetry, setCanRetry] = useState(true);
   const [showResult, setShowResult] = useState(false);
   const [resultData, setResultData] = useState(null);
 
@@ -61,7 +59,7 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
 
     setPhase('ended');
     const finalCorrect = correctRef.current;
-    const gameScore = scoreForGame(finalCorrect, TOTAL);
+    const gameScore = scoreForEcoSpeed(finalCorrect, TOTAL);
     const pct = Math.round((finalCorrect / TOTAL) * 100);
     setResultData({ correct: finalCorrect, total: TOTAL, gameScore, pct });
     setShowResult(true);
@@ -76,18 +74,10 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
     correctRef.current = 0;
     setAnswered(0);
     setFlash(null);
-    setNeedsRetry(false);
-    setCanRetry(true);
     setShowResult(false);
     setResultData(null);
     setPhase('playing');
   };
-
-  useEffect(() => {
-    if (phase !== 'playing') return;
-    setCanRetry(true);
-    setNeedsRetry(false);
-  }, [index, phase]);
 
   useEffect(() => {
     if (phase !== 'playing' || endedRef.current) return;
@@ -116,7 +106,7 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
 
   const handleAnswer = (pickedGood) => {
     if (phase !== 'playing' || endedRef.current || gameEnded) return;
-    if (flash || needsRetry) return;
+    if (flash) return;
 
     const item = queue[index];
     if (!item) return;
@@ -124,14 +114,20 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
     const isCorrect = pickedGood === item.isGood;
 
     if (!isCorrect) {
+      const nextAnswered = answered + 1;
+      setAnswered(nextAnswered);
       setFlash('wrong');
-      if (canRetry) {
-        setNeedsRetry(true);
-      } else {
-        setNeedsRetry(false);
-        if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
-        flashTimerRef.current = setTimeout(() => setFlash(null), 700);
-      }
+
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+      flashTimerRef.current = setTimeout(() => {
+        setFlash(null);
+        if (endedRef.current) return;
+        if (nextAnswered >= TOTAL) {
+          finishGame();
+        } else {
+          setIndex((i) => i + 1);
+        }
+      }, FLASH_MS);
       return;
     }
 
@@ -155,12 +151,6 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
     }, FLASH_MS);
   };
 
-  const handleTryAgain = () => {
-    setCanRetry(false);
-    setFlash(null);
-    setNeedsRetry(false);
-  };
-
   const handleResultDone = useCallback(() => {
     endCurrentGame(resultData);
   }, [endCurrentGame, resultData]);
@@ -175,8 +165,7 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
   };
 
   const item = queue[index];
-  const disabled =
-    phase !== 'playing' || !!flash || needsRetry || endedRef.current || gameEnded;
+  const disabled = phase !== 'playing' || !!flash || endedRef.current || gameEnded;
 
   if (showResult && resultData) {
     return (
@@ -287,55 +276,6 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
           )}
         </AnimatePresence>
       </div>
-
-      <AnimatePresence>
-        {needsRetry && canRetry && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[80] flex items-center justify-center bg-emerald-950/45 p-6 backdrop-blur-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="eco-wrong-title"
-          >
-            <motion.div
-              initial={{ scale: 0.88, y: 16 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-              className="w-full max-w-lg rounded-3xl border-4 border-amber-200 bg-white p-8 text-center shadow-2xl"
-            >
-              <motion.div
-                animate={{ x: [0, -6, 6, 0] }}
-                transition={{ duration: 0.45 }}
-                className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-amber-400 text-amber-950"
-              >
-                <XCircle className="size-9" />
-              </motion.div>
-              <p
-                id="eco-wrong-title"
-                className="font-display text-4xl font-extrabold text-rose-600"
-              >
-                {APP_COPY.wrong}
-              </p>
-              <p className="mt-2 text-lg font-bold text-emerald-800">
-                Διάλεξε ξανά την σωστή απάντηση
-              </p>
-              <p className="text-base font-bold text-amber-800/90">{APP_COPY.retryHint}</p>
-              <Button
-                size="xl"
-                variant="sun"
-                className="mt-6 w-full gap-2"
-                onClick={handleTryAgain}
-              >
-                <RotateCcw className="size-6" />
-                {APP_COPY.tryAgain}
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="grid shrink-0 grid-cols-2 gap-3 pb-1">
         <Button

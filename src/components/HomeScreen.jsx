@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { BookOpen, Play } from 'lucide-react';
-import { APP_COPY } from '../data/games';
-import Illustration from '../assets/illustrations/Illustration';
+import { APP_COPY, BRAND_NAME } from '../data/games';
+import landImg from '../assets/land-img.png';
 import PageShell from './PageShell';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -10,29 +10,25 @@ export default function HomeScreen({ onStart, onInstructions }) {
   return (
     <PageShell screenKey="home" className="justify-between">
       <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
-          className="w-full max-w-sm -rotate-1"
-        >
-          <div className="overflow-hidden rounded-3xl border-4 border-white shadow-2xl">
-            <Illustration name="save-earth" />
-          </div>
-        </motion.div>
-
         <Badge variant="sky" className="text-base px-4 py-1.5">
-          Attica Expo
+          {BRAND_NAME}
         </Badge>
 
-        <motion.h1
-          initial={{ y: 20, opacity: 0 }}
+        <motion.div
+          initial={{ y: 16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="font-display text-4xl font-extrabold leading-tight text-emerald-800 text-shadow-game md:text-5xl"
+          transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
+          className="flex w-full max-w-lg flex-col items-center gap-3"
         >
-          {APP_COPY.welcomeTitle}
-        </motion.h1>
+          <img
+            src={landImg}
+            alt=""
+            className="h-auto w-full max-h-[200px] object-contain drop-shadow-xl md:max-h-[240px]"
+          />
+          <h1 className="font-display text-4xl font-extrabold leading-tight text-emerald-800 text-shadow-game md:text-5xl">
+            {APP_COPY.welcomeTitle}
+          </h1>
+        </motion.div>
 
         <motion.p
           initial={{ y: 16, opacity: 0 }}

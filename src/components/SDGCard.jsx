@@ -12,6 +12,7 @@ export default function SDGCard({
   status = null,
   refCallback,
   compact = false,
+  showLabel = true,
   className,
 }) {
   const sdg = getSdg(sdgId);
@@ -53,14 +54,16 @@ export default function SDGCard({
       >
         <SdgIcon sdgId={sdgId} alt={sdg.title} />
       </div>
-      <span
-        className={cn(
-          'font-bold leading-tight text-emerald-900 line-clamp-2',
-          compact ? 'text-[9px] md:text-[10px]' : 'text-[10px]'
-        )}
-      >
-        {sdg.title}
-      </span>
+      {showLabel && (
+        <span
+          className={cn(
+            'font-bold leading-tight text-emerald-900 line-clamp-2',
+            compact ? 'text-[9px] md:text-[10px]' : 'text-[10px]'
+          )}
+        >
+          {sdg.title}
+        </span>
+      )}
       {selected && !readonly && (
         <span className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full bg-sky-500 text-white shadow-md">
           <Check className="size-3.5" strokeWidth={3} />

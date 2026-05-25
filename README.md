@@ -50,4 +50,4 @@ src/
 - Add official UN SDG icons under `public/sdg/`  
 - Edit copy and game data in `src/data/games.js`  
 
-Kiosk: 60s inactivity returns to home and clears progress.
+Kiosk: games 1–2 stay on screen until the player exits; game 3 ends when its timer runs out.

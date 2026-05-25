@@ -2,7 +2,7 @@
 
 ## SDG icons (`../sdgs/`)
 
-Official UN Sustainable Development Goal tiles: `sdg-{1–17}.svg.png`
+Official Greek UN SDG tiles: `sdgs-{1–17}.svg`
 
 ## Game illustrations (`./`)
 

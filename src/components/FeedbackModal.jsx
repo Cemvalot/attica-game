@@ -45,14 +45,23 @@ export default function FeedbackModal({
             >
               {correct ? <Sparkles className="size-9" /> : <XCircle className="size-9" />}
             </motion.div>
-            <p
-              className={`font-display text-3xl font-extrabold ${
-                correct ? 'text-emerald-600' : 'text-rose-600'
-              }`}
-            >
-              {correct ? APP_COPY.correct : APP_COPY.wrong}
-            </p>
-            <p className="mt-3 text-lg font-bold text-emerald-800">{message}</p>
+            {correct ? (
+              <>
+                <p className="font-display text-3xl font-extrabold text-emerald-600">
+                  {APP_COPY.correct}
+                </p>
+                <p className="mt-3 text-lg font-bold text-emerald-800">{message}</p>
+              </>
+            ) : message === APP_COPY.tryAgain ? (
+              <p className="font-display text-3xl font-extrabold text-rose-600">{message}</p>
+            ) : (
+              <>
+                <p className="font-display text-3xl font-extrabold text-rose-600">
+                  {APP_COPY.wrong}
+                </p>
+                <p className="mt-3 text-lg font-bold text-emerald-800">{message}</p>
+              </>
+            )}
             {showTryAgain && (
               <p className="mt-2 text-base font-bold text-amber-800/90">{APP_COPY.retryHint}</p>
             )}

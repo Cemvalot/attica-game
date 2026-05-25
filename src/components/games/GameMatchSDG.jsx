@@ -28,7 +28,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [feedback, setFeedback] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  const [highlightCorrect, setHighlightCorrect] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [canRetry, setCanRetry] = useState(true);
@@ -54,15 +53,13 @@ export default function GameMatchSDG({ onComplete, onHome }) {
 
     setFeedback({
       correct: ok,
-      message: ok ? scene.feedbackCorrect : scene.feedbackWrong,
+      message: ok ? scene.feedbackCorrect : APP_COPY.tryAgain,
     });
-    if (!ok) setHighlightCorrect(true);
   };
 
   const handleFeedbackContinue = () => {
     setFeedback(null);
     setSubmitted(false);
-    setHighlightCorrect(false);
     setSelected([]);
 
     if (sceneIndex + 1 >= TOTAL) {
@@ -80,7 +77,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
     setCanRetry(false);
     setFeedback(null);
     setSubmitted(false);
-    setHighlightCorrect(false);
     setSelected([]);
   };
 
@@ -94,7 +90,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
     setCorrectCount(0);
     setFeedback(null);
     setSubmitted(false);
-    setHighlightCorrect(false);
     setShowResult(false);
     setResultData(null);
     setCanRetry(true);
@@ -104,7 +99,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
     return (
       <ResultScreen
         title="Τέλος παιχνιδιού!"
-        subtitle={`${resultData.correct} από ${resultData.total} σωστές σκηνές`}
+        subtitle={`${resultData.correct}/${resultData.total} Σωστές Απαντήσεις`}
         percent={resultData.pct}
         onDone={handleResultDone}
       />
@@ -155,9 +150,8 @@ export default function GameMatchSDG({ onComplete, onHome }) {
             const isSelected = selected.includes(id);
             let status = null;
             if (submitted) {
-              if (highlightCorrect && scene.correctSdgIds.includes(id)) status = 'correct';
+              if (isSelected && scene.correctSdgIds.includes(id)) status = 'correct';
               else if (isSelected && !scene.correctSdgIds.includes(id)) status = 'wrong';
-              else if (!isSelected && scene.correctSdgIds.includes(id)) status = 'correct';
             }
             return (
               <SDGCard
@@ -167,6 +161,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
                 onClick={() => toggleSdg(id)}
                 status={status}
                 compact
+                showLabel={false}
                 className={cn(
                   isSelected && !submitted && 'ring-4 ring-sky-400 ring-offset-1'
                 )}
@@ -193,7 +188,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
         onContinue={handleFeedbackContinue}
         onTryAgain={handleTryAgain}
         canTryAgain={canRetry}
-        highlightIds={highlightCorrect ? scene.correctSdgIds : undefined}
       />
     </PageShell>
   );

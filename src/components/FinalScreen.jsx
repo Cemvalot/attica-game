@@ -2,16 +2,31 @@ import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
 import { motion } from 'framer-motion';
 import { Award, RotateCcw, Trophy } from 'lucide-react';
-import { APP_COPY } from '../data/games';
+import { APP_COPY, BRAND_NAME } from '../data/games';
 import { KIOSK_HEIGHT, KIOSK_WIDTH } from '../constants/kiosk';
 import PageShell from './PageShell';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 
 const badgeMeta = {
-  explorer: { icon: Award, color: 'from-emerald-400 to-green-500', label: 'Eco Explorer' },
-  protector: { icon: Trophy, color: 'from-sky-400 to-blue-500', label: 'Planet Protector' },
-  hero: { icon: Trophy, color: 'from-amber-300 to-orange-400', label: 'Eco Hero' },
+  enthusiast: {
+    icon: Award,
+    color: 'from-emerald-400 to-green-500',
+    label: 'Eco Enthusiast',
+    message: 'Καλή αρχή! Συνέχισε να μαθαίνεις για τον πλανήτη.',
+  },
+  guardian: {
+    icon: Trophy,
+    color: 'from-sky-400 to-blue-500',
+    label: 'Green Guardian',
+    message: 'Πολύ καλά! Προστατεύεις τη φύση με γνώση και δράση.',
+  },
+  hero: {
+    icon: Trophy,
+    color: 'from-amber-300 to-orange-400',
+    label: 'Eco Hero',
+    message: 'Υπέροχα! Είσαι πρωταθλητής βιωσιμότητας!',
+  },
 };
 
 export default function FinalScreen({ roundedScore, badge, onPlayAgain }) {
@@ -28,7 +43,7 @@ export default function FinalScreen({ roundedScore, badge, onPlayAgain }) {
     return () => cancelAnimationFrame(frame);
   }, [roundedScore]);
 
-  const meta = badgeMeta[badge?.id] ?? badgeMeta.protector;
+  const meta = badgeMeta[badge?.id] ?? badgeMeta.guardian;
   const Icon = meta.icon;
 
   return (
@@ -53,10 +68,15 @@ export default function FinalScreen({ roundedScore, badge, onPlayAgain }) {
           <Trophy className="size-24 text-amber-400 drop-shadow-lg" />
         </motion.div>
 
+        <Badge variant="sky" className="text-base px-4 py-1.5">
+          {BRAND_NAME}
+        </Badge>
+
         <h1 className="font-display text-5xl font-extrabold text-emerald-800 text-shadow-game">
           {APP_COPY.finalTitle}
         </h1>
         <p className="max-w-sm text-xl font-bold text-emerald-700">{APP_COPY.finalSubtitle}</p>
+        <p className="max-w-sm text-lg font-bold text-emerald-700/90">{meta.message}</p>
 
         <motion.div
           className="relative flex size-36 items-center justify-center rounded-full border-4 border-white bg-white shadow-2xl"

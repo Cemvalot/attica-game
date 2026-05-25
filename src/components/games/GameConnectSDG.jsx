@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link2 } from 'lucide-react';
-import { APP_COPY, CONNECT_GAME, scoreForGame } from '../../data/games';
+import {
+  APP_COPY,
+  CONNECT_GAME,
+  scoreForConnectLevel,
+} from '../../data/games';
 import { useGameExit } from '../../hooks/useGameExit';
 import { useConnectionLines } from '../../hooks/useConnectionLines';
 import Illustration from '../../assets/illustrations/Illustration';
@@ -13,17 +17,23 @@ import ResultScreen from '../ResultScreen';
 import PageShell from '../PageShell';
 import { ConnectionOverlay } from '../ConnectionLine';
 import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 
-const PAIRS = CONNECT_GAME.pairs;
-const TOTAL = PAIRS.length;
+const LEVELS = CONNECT_GAME.levels;
+const PAIRS_PER_LEVEL = CONNECT_GAME.pairsPerLevel;
+const LEVEL_COUNT = LEVELS.length;
 
 export default function GameConnectSDG({ onComplete, onHome }) {
+  const [levelIndex, setLevelIndex] = useState(0);
+  const [levelScores, setLevelScores] = useState([]);
+  const [levelCorrectCounts, setLevelCorrectCounts] = useState([]);
   const [selectedSdg, setSelectedSdg] = useState(null);
   const [connections, setConnections] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [lineStatuses, setLineStatuses] = useState({});
   const [feedback, setFeedback] = useState(null);
+  const [pendingLevel, setPendingLevel] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [shuffleKey, setShuffleKey] = useState(0);
@@ -34,6 +44,10 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   const actionRefs = useRef({});
 
   const { endCurrentGame, gameEnded } = useGameExit((result) => onComplete(result));
+
+  const level = LEVELS[levelIndex];
+  const pairs = level.pairs;
+  const totalPairs = pairs.length;
 
   const connectionsWithStatus = useMemo(
     () =>
@@ -52,9 +66,11 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   );
 
   useEffect(() => {
+    sdgRefs.current = {};
+    actionRefs.current = {};
     const id = requestAnimationFrame(remeasure);
     return () => cancelAnimationFrame(id);
-  }, [connections, remeasure, shuffleKey]);
+  }, [connections, remeasure, shuffleKey, levelIndex]);
 
   const connectedCount = connections.length;
   const disabled = submitted || gameEnded || showResult;
@@ -81,12 +97,12 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   };
 
   const handleCheck = () => {
-    if (disabled || connections.length < TOTAL) return;
+    if (disabled || connections.length < totalPairs) return;
     setSubmitted(true);
 
     const statuses = {};
     let correct = 0;
-    PAIRS.forEach((pair) => {
+    pairs.forEach((pair) => {
       const conn = connections.find((c) => c.sdgId === pair.sdgId);
       const ok = conn?.actionId === pair.actionId;
       if (ok) correct += 1;
@@ -94,23 +110,56 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     });
     setLineStatuses(statuses);
 
-    const gameScore = scoreForGame(correct, TOTAL);
-    const pct = Math.round((correct / TOTAL) * 100);
+    const levelScore = scoreForConnectLevel(correct, totalPairs);
+    const levelPerfect = correct === totalPairs;
 
+    setPendingLevel({ correct, levelScore, levelPerfect });
     setFeedback({
-      correct: correct === TOTAL,
-      message:
-        correct === TOTAL
-          ? 'Τέλεια! Όλες οι συνδέσεις είναι σωστές!'
-          : `Σωστές συνδέσεις: ${correct} από ${TOTAL}. Δες τις πράσινες γραμμές!`,
+      correct: levelPerfect,
+      message: levelPerfect
+        ? `${level.title}: Τέλεια! +${Math.round(levelScore)}% στο σκορ σου.`
+        : `${level.title}: ${correct} από ${totalPairs} σωστές. +${Math.round(levelScore)}%`,
     });
-    setResultData({ correct, total: TOTAL, gameScore, pct });
   };
 
-  const finishAfterFeedback = () => {
+  const advanceAfterLevel = useCallback(() => {
+    if (!pendingLevel) return;
+
+    const nextLevelScores = [...levelScores, pendingLevel.levelScore];
+    const nextCorrectCounts = [...levelCorrectCounts, pendingLevel.correct];
+    setLevelScores(nextLevelScores);
+    setLevelCorrectCounts(nextCorrectCounts);
+    setPendingLevel(null);
     setFeedback(null);
-    setShowResult(true);
     setCanRetry(true);
+
+    if (levelIndex < LEVEL_COUNT - 1) {
+      setLevelIndex((i) => i + 1);
+      setSelectedSdg(null);
+      setConnections([]);
+      setSubmitted(false);
+      setLineStatuses({});
+      setShuffleKey((k) => k + 1);
+      return;
+    }
+
+    const totalCorrect = nextCorrectCounts.reduce((sum, n) => sum + n, 0);
+    const totalQuestions = LEVEL_COUNT * PAIRS_PER_LEVEL;
+    const gameScore = nextLevelScores.reduce((sum, n) => sum + n, 0);
+    const pct = Math.round((totalCorrect / totalQuestions) * 100);
+
+    setResultData({
+      correct: totalCorrect,
+      total: totalQuestions,
+      gameScore,
+      pct,
+      levelsCompleted: LEVEL_COUNT,
+    });
+    setShowResult(true);
+  }, [pendingLevel, levelScores, levelCorrectCounts, levelIndex, level.title]);
+
+  const finishAfterFeedback = () => {
+    advanceAfterLevel();
   };
 
   const handleTryAgain = () => {
@@ -118,6 +167,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     setFeedback(null);
     setSubmitted(false);
     setLineStatuses({});
+    setPendingLevel(null);
   };
 
   const handleResultDone = useCallback(() => {
@@ -125,11 +175,15 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   }, [endCurrentGame, resultData]);
 
   const handleReplay = () => {
+    setLevelIndex(0);
+    setLevelScores([]);
+    setLevelCorrectCounts([]);
     setSelectedSdg(null);
     setConnections([]);
     setSubmitted(false);
     setLineStatuses({});
     setFeedback(null);
+    setPendingLevel(null);
     setShowResult(false);
     setResultData(null);
     setShuffleKey((k) => k + 1);
@@ -137,48 +191,55 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   };
 
   const actionCards = useMemo(() => {
-    const shuffled = [...PAIRS];
+    const shuffled = [...pairs];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
-  }, [shuffleKey]);
+  }, [shuffleKey, pairs]);
 
   if (showResult && resultData) {
     return (
       <ResultScreen
         title="Τέλος παιχνιδιού!"
-        subtitle={`${resultData.correct} από ${resultData.total} σωστές συνδέσεις`}
-        percent={resultData.pct}
+        subtitle={`${resultData.correct}/${resultData.total} συνδέσεις · ${resultData.levelsCompleted} επίπεδα`}
+        percent={Math.round(resultData.gameScore)}
         onDone={handleResultDone}
       />
     );
   }
 
   return (
-    <PageShell screenKey="connect" className="gap-3 overflow-hidden">
-      <GameHeader title="Σύνδεσε τον SDG με τη δράση" onHome={onHome} onReplay={handleReplay} />
-      <ProgressBar current={connectedCount} total={TOTAL} />
+    <PageShell screenKey={`connect-l${levelIndex}`} className="gap-3 overflow-hidden">
+      <GameHeader
+        title="Σύνδεσε τον SDG με τη δράση"
+        onHome={onHome}
+        onReplay={handleReplay}
+        right={
+          <Badge variant="sky" className="tabular-nums">
+            {level.title}
+          </Badge>
+        }
+      />
 
-      <motion.p
-        animate={{ opacity: [0.7, 1, 0.7] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="shrink-0 text-center text-sm font-extrabold text-emerald-800 md:text-base"
-      >
-        {selectedSdg
-          ? 'Τώρα πάτα τη σωστή δράση κάτω ↓'
-          : 'Πάτα έναν SDG πάνω ↑, μετά τη δράση κάτω ↓'}
-      </motion.p>
+      <div className="flex shrink-0 items-center justify-between gap-2">
+        <p className="text-sm font-extrabold text-emerald-800 md:text-base">{level.subtitle}</p>
+        <span className="text-xs font-bold text-emerald-700/80">
+          Επίπεδο {levelIndex + 1}/{LEVEL_COUNT}
+        </span>
+      </div>
+
+      <ProgressBar current={connectedCount} total={totalPairs} label="Συνδέσεις" />
 
       <div
         ref={containerRef}
-        className="relative flex min-h-0 flex-1 flex-col justify-between gap-6 overflow-visible py-1"
+        className="relative flex min-h-0 flex-1 flex-col justify-between gap-4 overflow-visible py-1 sm:gap-6"
       >
         <ConnectionOverlay lines={lines} width={size.width} height={size.height} />
 
         <div className="z-10 grid grid-cols-3 gap-3">
-          {PAIRS.map((pair) => {
+          {pairs.map((pair) => {
             const conn = connections.find((c) => c.sdgId === pair.sdgId);
             const status = submitted
               ? conn?.actionId === pair.actionId
@@ -187,13 +248,14 @@ export default function GameConnectSDG({ onComplete, onHome }) {
               : null;
             return (
               <SDGCard
-                key={pair.sdgId}
+                key={`${level.id}-${pair.sdgId}`}
                 sdgId={pair.sdgId}
                 selected={selectedSdg === pair.sdgId}
                 onClick={() => handleSdgTap(pair.sdgId)}
                 refCallback={setSdgRef(pair.sdgId)}
                 status={status}
                 compact
+                showLabel={false}
               />
             );
           })}
@@ -207,7 +269,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
               : null;
             return (
               <motion.button
-                key={pair.actionId}
+                key={`${level.id}-${pair.actionId}`}
                 ref={setActionRef(pair.actionId)}
                 type="button"
                 whileTap={{ scale: 0.96 }}
@@ -242,7 +304,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
         size="lg"
         className="w-full gap-2"
         onClick={handleCheck}
-        disabled={disabled || connectedCount < TOTAL}
+        disabled={disabled || connectedCount < totalPairs}
       >
         <Link2 className="size-5" />
         {APP_COPY.check}
