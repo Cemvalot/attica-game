@@ -256,17 +256,30 @@ export default function GameConnectSDG({ onComplete, onHome }) {
                     selectedSdg && !disabled && !conn && 'border-amber-400 ring-4 ring-amber-200'
                   )}
                 >
-                  <div className="min-h-0 flex-1 overflow-hidden rounded-xl">
+                  <div
+                    className={cn(
+                      'flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl',
+                      pair.imageFit === 'contain' && 'bg-gradient-to-b from-sky-50 to-emerald-50'
+                    )}
+                  >
                     <GameImage
-                      name={sdgImageKey(pair.sdgId)}
+                      name={pair.image ?? sdgImageKey(pair.sdgId)}
                       alt={pair.actionText}
-                      fit="cover"
-                      className="aspect-square h-full w-full"
+                      fit={pair.imageFit ?? 'cover'}
+                      className={cn(
+                        'h-full w-full',
+                        (pair.imageFit ?? 'cover') === 'cover' && 'aspect-square'
+                      )}
                       onLoad={scheduleMeasure}
                     />
                   </div>
                   <div className="mt-1.5 shrink-0 space-y-0.5 text-center">
-                    <span className="block line-clamp-2 text-xs font-extrabold leading-snug text-emerald-900">
+                    <span
+                      className={cn(
+                        'block text-xs font-extrabold leading-snug text-emerald-900',
+                        pair.actionDetail ? 'line-clamp-2' : 'line-clamp-4'
+                      )}
+                    >
                       {pair.actionText}
                     </span>
                     {pair.actionDetail && (

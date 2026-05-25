@@ -1,10 +1,8 @@
 /**
  * Game images — add files under src/assets/images/
  *
- * Παιχνίδι 1 (Σύνδεσε): sdg1.jpg … sdg17.jpg
- * Παιχνίδι 2 (Ταιριάζει):  sdg1-2.jpg … sdg17-2.jpg
- *
- * Supported: .jpg .jpeg .png .webp
+ * Παιχνίδι 1: custom image-*.jpg + sdg4/6/7/13.jpg (επίπεδο 1 & εκπαίδευση)
+ * Παιχνίδι 2: sdg2-2.jpg, sdg10-2.jpg, sdg13-2.jpg
  */
 
 /** @param {number} sdgId @param {1 | 2} [game=1] */
@@ -12,20 +10,26 @@ export function sdgImageKey(sdgId, game = 1) {
   return game === 2 ? `sdg${sdgId}-2` : `sdg${sdgId}`;
 }
 
-const sdgEntries = (suffix = '') =>
-  Object.fromEntries(
-    Array.from({ length: 17 }, (_, i) => {
-      const id = i + 1;
-      const key = suffix ? `sdg${id}-2` : `sdg${id}`;
-      return [key, `${key}.jpg`];
-    })
-  );
-
 export const IMAGE_MAP = {
-  ...sdgEntries(),
-  ...sdgEntries('-2'),
+  // Παιχνίδι 1 — default action photos (όπου δεν υπάρχει image-*)
+  sdg4: 'sdg4.jpg',
+  sdg6: 'sdg6.jpg',
+  sdg7: 'sdg7.jpg',
+  sdg13: 'sdg13.jpg',
 
-  // Menu (προαιρετικά)
+  // Παιχνίδι 1 — custom action scenes
+  'image-2': 'image-2.jpg',
+  'image-3': 'image-3.jpg',
+  'image-4': 'image-4.jpg',
+  'image-5': 'image-5.jpg',
+  'image-6': 'image-6.jpg',
+
+  // Παιχνίδι 2 — σκηνές
+  'sdg2-2': 'sdg2-2.jpg',
+  'sdg10-2': 'sdg10-2.jpg',
+  'sdg13-2': 'sdg13-2.jpg',
+
+  // Menu
   'menu-connect': 'menu-connect.jpg',
   'menu-match': 'menu-match.jpg',
   'menu-eco-speed': 'menu-eco-speed.jpg',

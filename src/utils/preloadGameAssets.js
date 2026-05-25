@@ -17,7 +17,7 @@ function imageKeysForGame(gameId) {
   switch (gameId) {
     case 'connectSDG':
       return CONNECT_GAME.levels.flatMap((level) =>
-        level.pairs.map((pair) => sdgImageKey(pair.sdgId))
+        level.pairs.map((pair) => pair.image ?? sdgImageKey(pair.sdgId))
       );
     case 'matchSDG':
       return MATCH_GAME.levels.map((level) => sdgImageKey(level.scene.imageSdgId, 2));

@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 
 const LEVELS = MATCH_GAME.levels;
 const LEVEL_COUNT = LEVELS.length;
+const REQUIRED_SELECTIONS = 3;
 
 export default function GameMatchSDG({ onComplete, onHome }) {
   const [levelIndex, setLevelIndex] = useState(0);
@@ -38,18 +39,20 @@ export default function GameMatchSDG({ onComplete, onHome }) {
 
   const level = LEVELS[levelIndex];
   const scene = level.scene;
-  const requiredSdgCount = scene.correctSdgIds.length;
   const disabled = submitted || gameEnded || showResult;
+  const selectionFull = selected.length >= REQUIRED_SELECTIONS;
 
   const toggleSdg = (id) => {
     if (disabled) return;
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelected((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= REQUIRED_SELECTIONS) return prev;
+      return [...prev, id];
+    });
   };
 
   const handleCheck = () => {
-    if (disabled || selected.length === 0) return;
+    if (disabled || selected.length !== REQUIRED_SELECTIONS) return;
     setSubmitted(true);
 
     const ok = matchSelectionIsCorrect(selected, scene.correctSdgIds);
@@ -147,10 +150,16 @@ export default function GameMatchSDG({ onComplete, onHome }) {
 
       <div className="flex shrink-0 items-center justify-between gap-2">
         <p className="text-sm font-extrabold text-emerald-800 md:text-base">
-          Διάλεξε {requiredSdgCount} σωστούς SDG
+          Διάλεξε ακριβώς {REQUIRED_SELECTIONS} SDG
         </p>
-        <Badge variant="sky" className="shrink-0 tabular-nums">
-          {selected.length} επιλογές
+        <Badge
+          variant="sky"
+          className={cn(
+            'shrink-0 tabular-nums',
+            selectionFull && !submitted && 'ring-2 ring-sky-500'
+          )}
+        >
+          {selected.length}/{REQUIRED_SELECTIONS}
         </Badge>
       </div>
 
@@ -203,7 +212,8 @@ export default function GameMatchSDG({ onComplete, onHome }) {
                 fillCell
                 showLabel={false}
                 className={cn(
-                  isSelected && !submitted && 'ring-4 ring-sky-400 ring-offset-1'
+                  isSelected && !submitted && 'ring-4 ring-sky-400 ring-offset-1',
+                  selectionFull && !isSelected && !submitted && 'opacity-45 saturate-75'
                 )}
               />
             );
@@ -215,7 +225,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
         size="lg"
         className="shrink-0 gap-2"
         onClick={handleCheck}
-        disabled={disabled || selected.length === 0}
+        disabled={disabled || selected.length !== REQUIRED_SELECTIONS}
       >
         <Search className="size-5" />
         {APP_COPY.check}
