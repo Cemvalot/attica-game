@@ -68,18 +68,23 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   useEffect(() => {
     sdgRefs.current = {};
     actionRefs.current = {};
+  }, [levelIndex, shuffleKey]);
+
+  useEffect(() => {
     const id = requestAnimationFrame(remeasure);
     return () => cancelAnimationFrame(id);
-  }, [connections, remeasure, shuffleKey, levelIndex]);
+  }, [connections, lineStatuses, remeasure, levelIndex, shuffleKey]);
 
   const connectedCount = connections.length;
   const disabled = submitted || gameEnded || showResult;
 
   const setSdgRef = (id) => (el) => {
     if (el) sdgRefs.current[id] = el;
+    else delete sdgRefs.current[id];
   };
   const setActionRef = (id) => (el) => {
     if (el) actionRefs.current[id] = el;
+    else delete actionRefs.current[id];
   };
 
   const handleSdgTap = (sdgId) => {
@@ -94,6 +99,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
       return [...filtered, { sdgId: selectedSdg, actionId }];
     });
     setSelectedSdg(null);
+    requestAnimationFrame(() => requestAnimationFrame(remeasure));
   };
 
   const handleCheck = () => {

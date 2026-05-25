@@ -48,7 +48,7 @@ export function ConnectionOverlay({ lines, width, height }) {
 
   return (
     <svg
-      className="pointer-events-none absolute inset-0 z-[5] h-full w-full overflow-visible"
+      className="pointer-events-none absolute inset-0 z-[8] h-full w-full overflow-visible"
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
       aria-hidden="true"
