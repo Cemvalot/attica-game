@@ -33,7 +33,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
   const [pendingLevel, setPendingLevel] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [resultData, setResultData] = useState(null);
-  const [canRetry, setCanRetry] = useState(true);
 
   const { endCurrentGame, gameEnded } = useGameExit((result) => onComplete(result));
 
@@ -60,15 +59,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
       setPendingLevel({ correct: 1, levelScore, levelPerfect: true });
       setFeedback({
         correct: true,
-        message: `${level.title}: ${scene.feedbackCorrect} +${Math.round(levelScore)}%`,
-      });
-      return;
-    }
-
-    if (canRetry) {
-      setFeedback({
-        correct: false,
-        message: scene.feedbackWrong,
+        message: null,
       });
       return;
     }
@@ -77,7 +68,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
     setPendingLevel({ correct: 0, levelScore, levelPerfect: false });
     setFeedback({
       correct: false,
-      message: APP_COPY.advanceScene,
+      message: null,
     });
   };
 
@@ -92,7 +83,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
     setFeedback(null);
     setSubmitted(false);
     setSelected([]);
-    setCanRetry(true);
 
     if (levelIndex < LEVEL_COUNT - 1) {
       setLevelIndex((i) => i + 1);
@@ -117,13 +107,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
     if (pendingLevel) {
       advanceAfterLevel();
     }
-  };
-
-  const handleTryAgain = () => {
-    setCanRetry(false);
-    setFeedback(null);
-    setSubmitted(false);
-    setSelected([]);
   };
 
   const handleResultDone = useCallback(() => {
@@ -243,8 +226,6 @@ export default function GameMatchSDG({ onComplete, onHome }) {
         correct={feedback?.correct}
         message={feedback?.message}
         onContinue={handleFeedbackContinue}
-        onTryAgain={handleTryAgain}
-        canTryAgain={canRetry && !pendingLevel}
       />
     </PageShell>
   );

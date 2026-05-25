@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link2 } from 'lucide-react';
 import {
   APP_COPY,
@@ -37,11 +37,8 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   const [showResult, setShowResult] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [shuffleKey, setShuffleKey] = useState(0);
-  const [canRetry, setCanRetry] = useState(true);
 
-  const containerRef = useRef(null);
-  const sdgRefs = useRef({});
-  const actionRefs = useRef({});
+  const boardRef = useRef(null);
 
   const { endCurrentGame, gameEnded } = useGameExit((result) => onComplete(result));
 
@@ -58,33 +55,31 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     [connections, lineStatuses]
   );
 
-  const { lines, size, remeasure } = useConnectionLines(
-    containerRef,
-    connectionsWithStatus,
-    sdgRefs,
-    actionRefs
+  const { lines, size, measureNow, scheduleMeasure } = useConnectionLines(
+    boardRef,
+    connectionsWithStatus
   );
 
-  useEffect(() => {
-    sdgRefs.current = {};
-    actionRefs.current = {};
-  }, [levelIndex, shuffleKey]);
+  useLayoutEffect(() => {
+    scheduleMeasure();
+  }, [levelIndex, shuffleKey, scheduleMeasure]);
 
-  useEffect(() => {
-    remeasure();
-  }, [connections, lineStatuses, levelIndex, shuffleKey, remeasure]);
+  const actionCards = useMemo(() => {
+    const shuffled = [...pairs];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [shuffleKey, pairs]);
+
+  useLayoutEffect(() => {
+    measureNow();
+    scheduleMeasure();
+  }, [connections, lineStatuses, measureNow, scheduleMeasure]);
 
   const connectedCount = connections.length;
   const disabled = submitted || gameEnded || showResult;
-
-  const setSdgRef = (id) => (el) => {
-    if (el) sdgRefs.current[id] = el;
-    else delete sdgRefs.current[id];
-  };
-  const setActionRef = (id) => (el) => {
-    if (el) actionRefs.current[id] = el;
-    else delete actionRefs.current[id];
-  };
 
   const handleSdgTap = (sdgId) => {
     if (disabled) return;
@@ -98,6 +93,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
       return [...filtered, { sdgId: selectedSdg, actionId }];
     });
     setSelectedSdg(null);
+    scheduleMeasure();
   };
 
   const handleCheck = () => {
@@ -120,9 +116,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     setPendingLevel({ correct, levelScore, levelPerfect });
     setFeedback({
       correct: levelPerfect,
-      message: levelPerfect
-        ? `${level.title}: Τέλεια! +${Math.round(levelScore)}% στο σκορ σου.`
-        : `${level.title}: ${correct} από ${totalPairs} σωστές. +${Math.round(levelScore)}%`,
+      message: null,
     });
   };
 
@@ -135,7 +129,6 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     setLevelCorrectCounts(nextCorrectCounts);
     setPendingLevel(null);
     setFeedback(null);
-    setCanRetry(true);
 
     if (levelIndex < LEVEL_COUNT - 1) {
       setLevelIndex((i) => i + 1);
@@ -166,26 +159,9 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     advanceAfterLevel();
   };
 
-  const handleTryAgain = () => {
-    setCanRetry(false);
-    setFeedback(null);
-    setSubmitted(false);
-    setLineStatuses({});
-    setPendingLevel(null);
-  };
-
   const handleResultDone = useCallback(() => {
     endCurrentGame(resultData);
   }, [endCurrentGame, resultData]);
-
-  const actionCards = useMemo(() => {
-    const shuffled = [...pairs];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  }, [shuffleKey, pairs]);
 
   if (showResult && resultData) {
     return (
@@ -199,7 +175,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   }
 
   return (
-    <PageShell screenKey={`connect-l${levelIndex}`} className="gap-3 overflow-hidden">
+    <PageShell screenKey="connectSDG" className="gap-3 overflow-hidden">
       <GameHeader
         title="Σύνδεσε τον SDG με τη δράση"
         onHome={onHome}
@@ -220,10 +196,10 @@ export default function GameConnectSDG({ onComplete, onHome }) {
       <ProgressBar current={connectedCount} total={totalPairs} label="Συνδέσεις" />
 
       <div
-        ref={containerRef}
-        className="relative flex min-h-0 flex-1 flex-col justify-between gap-4 overflow-visible py-1 sm:gap-6"
+        ref={boardRef}
+        className="relative flex min-h-0 flex-1 flex-col gap-3 overflow-visible py-1 sm:gap-4"
       >
-        <div className="relative z-10 grid grid-cols-3 gap-3">
+        <div className="relative z-10 shrink-0 grid grid-cols-3 gap-3">
           {pairs.map((pair) => {
             const conn = connections.find((c) => c.sdgId === pair.sdgId);
             const status = submitted
@@ -232,21 +208,30 @@ export default function GameConnectSDG({ onComplete, onHome }) {
                 : 'wrong'
               : null;
             return (
-              <SDGCard
+              <div
                 key={`${level.id}-${pair.sdgId}`}
-                sdgId={pair.sdgId}
-                selected={selectedSdg === pair.sdgId}
-                onClick={() => handleSdgTap(pair.sdgId)}
-                refCallback={setSdgRef(pair.sdgId)}
-                status={status}
-                compact
-                showLabel={false}
-              />
+                data-connect-top={pair.sdgId}
+                className="h-full w-full"
+              >
+                <SDGCard
+                  sdgId={pair.sdgId}
+                  selected={selectedSdg === pair.sdgId}
+                  onClick={() => handleSdgTap(pair.sdgId)}
+                  status={status}
+                  compact
+                  showLabel={false}
+                />
+              </div>
             );
           })}
         </div>
 
-        <div className="relative z-10 grid grid-cols-3 gap-3">
+        <div
+          className="pointer-events-none min-h-10 shrink-0 flex-1 sm:min-h-14"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 shrink-0 grid grid-cols-3 gap-3">
           {actionCards.map((pair) => {
             const conn = connections.find((c) => c.actionId === pair.actionId);
             const status = conn
@@ -255,7 +240,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
             return (
               <div
                 key={`${level.id}-${pair.actionId}`}
-                ref={setActionRef(pair.actionId)}
+                data-connect-bottom={pair.actionId}
                 className="h-full w-full"
               >
                 <button
@@ -277,6 +262,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
                       alt={pair.actionText}
                       fit="cover"
                       className="aspect-square h-full w-full"
+                      onLoad={scheduleMeasure}
                     />
                   </div>
                   <div className="mt-1.5 shrink-0 space-y-0.5 text-center">
@@ -313,8 +299,6 @@ export default function GameConnectSDG({ onComplete, onHome }) {
         correct={feedback?.correct}
         message={feedback?.message}
         onContinue={finishAfterFeedback}
-        onTryAgain={handleTryAgain}
-        canTryAgain={canRetry}
       />
     </PageShell>
   );

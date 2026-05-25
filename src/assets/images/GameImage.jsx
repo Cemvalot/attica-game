@@ -37,6 +37,7 @@ export default function GameImage({
   className,
   animate = false,
   fit = 'cover',
+  onLoad,
 }) {
   const [src, setSrc] = useState(() => getGameImageUrl(name));
 
@@ -89,6 +90,7 @@ export default function GameImage({
           className={imgClass}
           loading="lazy"
           decoding="async"
+          onLoad={onLoad}
         />
       </div>
     );

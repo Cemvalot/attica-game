@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { RotateCcw, Sparkles, XCircle } from 'lucide-react';
+import { Sparkles, XCircle } from 'lucide-react';
 import { APP_COPY } from '../data/games';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -9,12 +9,8 @@ export default function FeedbackModal({
   correct,
   message,
   onContinue,
-  onTryAgain,
-  canTryAgain = true,
   highlightIds,
 }) {
-  const showTryAgain = !correct && canTryAgain && onTryAgain;
-
   return (
     <AnimatePresence>
       {open && (
@@ -50,20 +46,14 @@ export default function FeedbackModal({
                 <p className="font-display text-3xl font-extrabold text-emerald-600">
                   {APP_COPY.correct}
                 </p>
-                <p className="mt-3 text-lg font-bold text-emerald-800">{message}</p>
+                {message && (
+                  <p className="mt-3 text-lg font-bold text-emerald-800">{message}</p>
+                )}
               </>
-            ) : message === APP_COPY.tryAgain || message === APP_COPY.advanceScene ? (
-              <p className="font-display text-3xl font-extrabold text-rose-600">{message}</p>
             ) : (
-              <>
-                <p className="font-display text-3xl font-extrabold text-rose-600">
-                  {APP_COPY.wrong}
-                </p>
-                <p className="mt-3 text-lg font-bold text-emerald-800">{message}</p>
-              </>
-            )}
-            {showTryAgain && (
-              <p className="mt-2 text-base font-bold text-amber-800/90">{APP_COPY.retryHint}</p>
+              <p className="font-display text-3xl font-extrabold text-rose-600">
+                {APP_COPY.wrong}
+              </p>
             )}
             {highlightIds?.length > 0 && (
               <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -74,16 +64,9 @@ export default function FeedbackModal({
                 ))}
               </div>
             )}
-            {correct || !showTryAgain ? (
-              <Button size="lg" className="mt-6 w-full" onClick={onContinue}>
-                {APP_COPY.continue}
-              </Button>
-            ) : (
-              <Button size="lg" variant="sun" className="mt-6 w-full gap-2" onClick={onTryAgain}>
-                <RotateCcw className="size-5" />
-                {APP_COPY.tryAgain}
-              </Button>
-            )}
+            <Button size="lg" className="mt-6 w-full" onClick={onContinue}>
+              {APP_COPY.continue}
+            </Button>
           </motion.div>
         </motion.div>
       )}

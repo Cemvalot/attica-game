@@ -1,61 +1,67 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-/** Position relative to container using layout offsets (works with CSS zoom). */
-function pointInContainer(container, el, anchor) {
-  if (!container || !el || !container.contains(el)) return null;
+/** Position relative to board using layout offsets (works with CSS zoom). */
+function pointInBoard(board, el, anchor) {
+  if (!board || !el) return null;
 
   let top = 0;
   let left = 0;
   let node = el;
 
-  while (node && node !== container) {
+  while (node && node !== board) {
     top += node.offsetTop;
     left += node.offsetLeft;
     node = node.offsetParent;
   }
 
-  if (node !== container) {
-    const cRect = container.getBoundingClientRect();
-    const eRect = el.getBoundingClientRect();
-    if (!cRect.width || !cRect.height) return null;
-    const scaleX = container.offsetWidth / cRect.width;
-    const scaleY = container.offsetHeight / cRect.height;
-    const x = (eRect.left + eRect.width / 2 - cRect.left) * scaleX;
-    const y =
-      anchor === 'bottom'
-        ? (eRect.bottom - cRect.top) * scaleY
-        : (eRect.top - cRect.top) * scaleY;
+  if (node === board) {
+    const x = left + el.offsetWidth / 2;
+    const y = anchor === 'bottom' ? top + el.offsetHeight : top;
     return { x, y };
   }
 
-  const x = left + el.offsetWidth / 2;
-  const y = anchor === 'bottom' ? top + el.offsetHeight : top;
-  return { x, y };
+  const bRect = board.getBoundingClientRect();
+  const eRect = el.getBoundingClientRect();
+  const bw = board.clientWidth;
+  const bh = board.clientHeight;
+
+  if (!bRect.width || !bRect.height || bw < 1 || bh < 1) return null;
+
+  const sx = bw / bRect.width;
+  const sy = bh / bRect.height;
+
+  return {
+    x: (eRect.left + eRect.width / 2 - bRect.left) * sx,
+    y:
+      anchor === 'bottom'
+        ? (eRect.bottom - bRect.top) * sy
+        : (eRect.top - bRect.top) * sy,
+  };
 }
 
-export function useConnectionLines(containerRef, connections, sdgRefs, actionRefs) {
+export function useConnectionLines(boardRef, connections) {
   const [lines, setLines] = useState([]);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const measureRaf = useRef(null);
 
   const measureNow = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const board = boardRef.current;
+    if (!board) return;
 
-    const width = container.offsetWidth;
-    const height = container.offsetHeight;
-    if (!width || !height) return;
+    const width = board.offsetWidth || board.clientWidth;
+    const height = board.offsetHeight || board.clientHeight;
+    if (width < 1 || height < 1) return;
 
     setSize({ width, height });
 
     const next = connections
       .map((conn) => {
-        const sdgEl = sdgRefs.current[conn.sdgId];
-        const actEl = actionRefs.current[conn.actionId];
-        if (!sdgEl || !actEl) return null;
+        const topEl = board.querySelector(`[data-connect-top="${conn.sdgId}"]`);
+        const bottomEl = board.querySelector(`[data-connect-bottom="${conn.actionId}"]`);
+        if (!topEl || !bottomEl) return null;
 
-        const start = pointInContainer(container, sdgEl, 'bottom');
-        const end = pointInContainer(container, actEl, 'top');
+        const start = pointInBoard(board, topEl, 'bottom');
+        const end = pointInBoard(board, bottomEl, 'top');
         if (!start || !end) return null;
 
         return {
@@ -70,45 +76,50 @@ export function useConnectionLines(containerRef, connections, sdgRefs, actionRef
       .filter(Boolean);
 
     setLines(next);
-  }, [connections, containerRef, sdgRefs, actionRefs]);
+  }, [connections, boardRef]);
 
-  const measure = useCallback(() => {
-    if (measureRaf.current != null) return;
+  const scheduleMeasure = useCallback(() => {
+    if (measureRaf.current != null) {
+      cancelAnimationFrame(measureRaf.current);
+    }
     measureRaf.current = requestAnimationFrame(() => {
       measureRaf.current = null;
       measureNow();
     });
   }, [measureNow]);
 
+  useLayoutEffect(() => {
+    measureNow();
+  }, [measureNow]);
+
   useEffect(() => {
     measureNow();
 
-    const ro = new ResizeObserver(() => measure());
-    const container = containerRef.current;
+    const board = boardRef.current;
+    if (!board) return undefined;
 
-    if (container) {
-      ro.observe(container);
-    }
+    const ro = new ResizeObserver(() => scheduleMeasure());
+    ro.observe(board);
 
-    const observeRefs = () => {
-      Object.values(sdgRefs.current).forEach((el) => el && ro.observe(el));
-      Object.values(actionRefs.current).forEach((el) => el && ro.observe(el));
+    const observeCards = () => {
+      board.querySelectorAll('[data-connect-top], [data-connect-bottom]').forEach((el) => {
+        ro.observe(el);
+      });
     };
+    observeCards();
+    const id = requestAnimationFrame(observeCards);
 
-    observeRefs();
-    const t = requestAnimationFrame(observeRefs);
-
-    window.addEventListener('resize', measure);
+    window.addEventListener('resize', scheduleMeasure);
     return () => {
-      cancelAnimationFrame(t);
+      cancelAnimationFrame(id);
       if (measureRaf.current != null) {
         cancelAnimationFrame(measureRaf.current);
         measureRaf.current = null;
       }
       ro.disconnect();
-      window.removeEventListener('resize', measure);
+      window.removeEventListener('resize', scheduleMeasure);
     };
-  }, [measure, measureNow, containerRef, connections]);
+  }, [measureNow, scheduleMeasure, boardRef, connections.length]);
 
-  return { lines, size, remeasure: measure };
+  return { lines, size, measureNow, scheduleMeasure };
 }
