@@ -106,6 +106,100 @@
     image-rendering: auto;
   }
 
+  .bg-blob {
+    will-change: transform;
+  }
+
+  .bg-blob-1 {
+    animation: blob-drift-1 12s ease-in-out infinite;
+  }
+
+  .bg-blob-2 {
+    animation: blob-drift-2 14s ease-in-out infinite;
+  }
+
+  .bg-blob-3 {
+    animation: blob-pulse 8s ease-in-out infinite;
+  }
+
+  @keyframes blob-drift-1 {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(30px, -20px);
+    }
+  }
+
+  @keyframes blob-drift-2 {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-25px, 15px);
+    }
+  }
+
+  @keyframes blob-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.12);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-blob {
+      animation: none;
+    }
+
+    .sdg-shake,
+    .sdg-pop {
+      animation: none;
+    }
+  }
+
+  .sdg-shake {
+    animation: sdg-shake 0.45s ease;
+  }
+
+  .sdg-pop {
+    animation: sdg-pop 0.4s ease;
+  }
+
+  @keyframes sdg-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-8px);
+    }
+    40% {
+      transform: translateX(8px);
+    }
+    60% {
+      transform: translateX(-6px);
+    }
+    80% {
+      transform: translateX(6px);
+    }
+  }
+
+  @keyframes sdg-pop {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.04);
+    }
+  }
+
   /* Slightly larger UI copy on big displays (TV / large monitor) */
   @media (min-width: 1200px), (min-height: 900px) {
     .kiosk-inner .text-\[10px\] {

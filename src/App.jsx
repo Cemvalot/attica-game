@@ -1,5 +1,4 @@
-import { lazy, Suspense, useState, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { lazy, Suspense, useState, useCallback, useMemo, startTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
   GAME_IDS,
@@ -12,6 +11,7 @@ import InstructionsModal from './components/InstructionsModal';
 import GameMenu from './components/GameMenu';
 import FinalScreen from './components/FinalScreen';
 import KioskViewport from './components/KioskViewport';
+import { preloadAllGameChunks, preloadMenuImages } from './utils/preloadGameAssets';
 
 const GameConnectSDG = lazy(() => import('./components/games/GameConnectSDG'));
 const GameMatchSDG = lazy(() => import('./components/games/GameMatchSDG'));
@@ -20,9 +20,7 @@ const GameEcoSpeed = lazy(() => import('./components/games/GameEcoSpeed'));
 function GameLoading() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 text-emerald-800">
-      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-        <Loader2 className="size-14 text-emerald-500" />
-      </motion.div>
+      <Loader2 className="size-14 animate-spin text-emerald-500" />
       <p className="font-display text-2xl font-bold">Φόρτωση…</p>
     </div>
   );
@@ -50,18 +48,28 @@ export default function App() {
   const finalBadge = useMemo(() => getBadge(totalRounded), [totalRounded]);
 
   const resetAll = useCallback(() => {
-    setScreen(SCREENS.home);
-    setCompletedGames([]);
-    setGameScores(INITIAL_SCORES);
-    setInstructionsOpen(false);
+    startTransition(() => {
+      setScreen(SCREENS.home);
+      setCompletedGames([]);
+      setGameScores(INITIAL_SCORES);
+      setInstructionsOpen(false);
+    });
   }, []);
 
-  const goHome = () => setScreen(SCREENS.home);
-  const goMenu = () => setScreen(SCREENS.menu);
+  const goHome = () => startTransition(() => setScreen(SCREENS.home));
+  const goMenu = () => {
+    void preloadMenuImages();
+    void preloadAllGameChunks();
+    startTransition(() => setScreen(SCREENS.menu));
+  };
+
+  const goToGame = useCallback((gameId) => {
+    startTransition(() => setScreen(SCREENS[gameId] ?? SCREENS.menu));
+  }, []);
 
   const handleGameComplete = useCallback((gameId, result) => {
     if (!result) {
-      setScreen(SCREENS.menu);
+      startTransition(() => setScreen(SCREENS.menu));
       return;
     }
 
@@ -72,7 +80,7 @@ export default function App() {
           ? prevCompleted
           : [...prevCompleted, gameId];
         const allDone = GAME_IDS.every((id) => updated.includes(id));
-        setScreen(allDone ? SCREENS.final : SCREENS.menu);
+        startTransition(() => setScreen(allDone ? SCREENS.final : SCREENS.menu));
         return updated;
       });
       return nextScores;
@@ -91,7 +99,7 @@ export default function App() {
       case SCREENS.menu:
         return (
           <GameMenu
-            onSelectGame={(id) => setScreen(SCREENS[id] ?? SCREENS.menu)}
+            onSelectGame={goToGame}
             onHome={goHome}
             completedGames={completedGames}
             totalRounded={totalRounded}

@@ -3,23 +3,23 @@ import AnimatedBackground from './AnimatedBackground';
 import { cn } from '@/lib/utils';
 
 const pageVariants = {
-  initial: { opacity: 0, y: 24, scale: 0.98 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -16, scale: 0.98 },
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 export default function PageShell({ children, className, screenKey }) {
   return (
     <div className="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
       <AnimatedBackground />
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         <motion.main
           key={screenKey}
           variants={pageVariants}
           initial="initial"
           animate="animate"
           exit="exit"
-          transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+          transition={{ duration: 0.12, ease: 'easeOut' }}
           className={cn(
             'relative z-10 flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]',
             className

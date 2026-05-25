@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /** Position relative to container using layout offsets (works with CSS zoom). */
 function pointInContainer(container, el, anchor) {
@@ -36,8 +36,9 @@ function pointInContainer(container, el, anchor) {
 export function useConnectionLines(containerRef, connections, sdgRefs, actionRefs) {
   const [lines, setLines] = useState([]);
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const measureRaf = useRef(null);
 
-  const measure = useCallback(() => {
+  const measureNow = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -71,8 +72,16 @@ export function useConnectionLines(containerRef, connections, sdgRefs, actionRef
     setLines(next);
   }, [connections, containerRef, sdgRefs, actionRefs]);
 
+  const measure = useCallback(() => {
+    if (measureRaf.current != null) return;
+    measureRaf.current = requestAnimationFrame(() => {
+      measureRaf.current = null;
+      measureNow();
+    });
+  }, [measureNow]);
+
   useEffect(() => {
-    measure();
+    measureNow();
 
     const ro = new ResizeObserver(() => measure());
     const container = containerRef.current;
@@ -92,10 +101,14 @@ export function useConnectionLines(containerRef, connections, sdgRefs, actionRef
     window.addEventListener('resize', measure);
     return () => {
       cancelAnimationFrame(t);
+      if (measureRaf.current != null) {
+        cancelAnimationFrame(measureRaf.current);
+        measureRaf.current = null;
+      }
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [measure, containerRef, connections]);
+  }, [measure, measureNow, containerRef, connections]);
 
   return { lines, size, remeasure: measure };
 }

@@ -1,7 +1,12 @@
-import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { CheckCircle2, Home, Sparkles } from 'lucide-react';
 import { APP_COPY, MENU_GAMES } from '../data/games';
 import GameImage from '../assets/images/GameImage';
+import {
+  preloadAllGameChunks,
+  preloadMenuImages,
+  warmGameForPlay,
+} from '../utils/preloadGameAssets';
 import PageShell from './PageShell';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -9,19 +14,20 @@ import { Progress } from './ui/progress';
 import { Card, CardContent } from './ui/card';
 import { cn } from '@/lib/utils';
 
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.92 },
-  show: (i) => ({
-    opacity: 1,
-    scale: 1,
-    transition: { type: 'spring', stiffness: 260, damping: 22, delay: i * 0.06 },
-  }),
-};
-
 export default function GameMenu({ onSelectGame, onHome, completedGames, totalRounded }) {
   const doneCount = completedGames.length;
   const totalGames = MENU_GAMES.length;
   const progressPct = (doneCount / totalGames) * 100;
+
+  useEffect(() => {
+    void preloadMenuImages();
+    void preloadAllGameChunks();
+  }, []);
+
+  const handleSelectGame = (gameId) => {
+    void warmGameForPlay(gameId);
+    onSelectGame(gameId);
+  };
 
   return (
     <PageShell screenKey="menu" className="gap-3 overflow-hidden">
@@ -56,32 +62,26 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, totalRo
         className="grid min-h-0 flex-1 grid-cols-1 gap-3"
         style={{ gridTemplateRows: 'repeat(3, minmax(0, 1fr))' }}
       >
-        {MENU_GAMES.map((game, i) => {
+        {MENU_GAMES.map((game) => {
           const done = completedGames.includes(game.id);
 
           return (
-            <motion.div
+            <div
               key={game.id}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              animate="show"
-              whileTap={done ? undefined : { scale: 0.97 }}
-              whileHover={done ? undefined : { scale: 1.02 }}
               className={cn(
-                'relative flex h-full min-h-0 w-full',
+                'relative flex h-full min-h-0 w-full transition-transform active:scale-[0.98]',
                 done ? 'cursor-default' : 'cursor-pointer'
               )}
               role={done ? undefined : 'button'}
               tabIndex={done ? -1 : 0}
               aria-disabled={done || undefined}
               onClick={() => {
-                if (!done) onSelectGame(game.id);
+                if (!done) handleSelectGame(game.id);
               }}
               onKeyDown={(e) => {
                 if (!done && (e.key === 'Enter' || e.key === ' ')) {
                   e.preventDefault();
-                  onSelectGame(game.id);
+                  handleSelectGame(game.id);
                 }
               }}
             >
@@ -132,7 +132,7 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, totalRo
                   </div>
                 )}
               </Card>
-            </motion.div>
+            </div>
           );
         })}
       </div>

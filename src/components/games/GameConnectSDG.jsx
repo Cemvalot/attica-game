@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import { Link2 } from 'lucide-react';
 import {
   APP_COPY,
@@ -66,20 +65,14 @@ export default function GameConnectSDG({ onComplete, onHome }) {
     actionRefs
   );
 
-  const scheduleMeasure = useCallback(() => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(remeasure);
-    });
-  }, [remeasure]);
-
   useEffect(() => {
     sdgRefs.current = {};
     actionRefs.current = {};
   }, [levelIndex, shuffleKey]);
 
   useEffect(() => {
-    scheduleMeasure();
-  }, [connections, lineStatuses, levelIndex, shuffleKey, scheduleMeasure]);
+    remeasure();
+  }, [connections, lineStatuses, levelIndex, shuffleKey, remeasure]);
 
   const connectedCount = connections.length;
   const disabled = submitted || gameEnded || showResult;
@@ -87,12 +80,10 @@ export default function GameConnectSDG({ onComplete, onHome }) {
   const setSdgRef = (id) => (el) => {
     if (el) sdgRefs.current[id] = el;
     else delete sdgRefs.current[id];
-    scheduleMeasure();
   };
   const setActionRef = (id) => (el) => {
     if (el) actionRefs.current[id] = el;
     else delete actionRefs.current[id];
-    scheduleMeasure();
   };
 
   const handleSdgTap = (sdgId) => {
@@ -107,7 +98,6 @@ export default function GameConnectSDG({ onComplete, onHome }) {
       return [...filtered, { sdgId: selectedSdg, actionId }];
     });
     setSelectedSdg(null);
-    scheduleMeasure();
   };
 
   const handleCheck = () => {
@@ -268,14 +258,13 @@ export default function GameConnectSDG({ onComplete, onHome }) {
                 ref={setActionRef(pair.actionId)}
                 className="h-full w-full"
               >
-                <motion.button
+                <button
                   type="button"
-                  whileTap={{ scale: 0.96 }}
-                  whileHover={disabled ? undefined : { scale: 1.03 }}
                   onClick={() => handleActionTap(pair.actionId)}
                   disabled={disabled}
                   className={cn(
-                    'flex h-full min-h-[120px] w-full flex-col overflow-hidden rounded-2xl border-4 bg-white p-2 text-center shadow-xl transition-colors',
+                    'flex h-full min-h-[120px] w-full flex-col overflow-hidden rounded-2xl border-4 bg-white p-2 text-center shadow-xl transition-transform duration-150 active:scale-[0.97]',
+                    !disabled && 'hover:scale-[1.02]',
                     conn && 'border-sky-400 ring-2 ring-sky-200',
                     status === 'correct' && 'border-emerald-500 bg-emerald-50 ring-4 ring-emerald-300',
                     status === 'wrong' && 'border-rose-500 bg-rose-50 ring-4 ring-rose-200',
@@ -300,7 +289,7 @@ export default function GameConnectSDG({ onComplete, onHome }) {
                       </span>
                     )}
                   </div>
-                </motion.button>
+                </button>
               </div>
             );
           })}
