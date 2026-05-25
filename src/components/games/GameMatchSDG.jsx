@@ -128,7 +128,7 @@ export default function GameMatchSDG({ onComplete, onHome }) {
   }
 
   return (
-    <PageShell screenKey={`match-l${levelIndex}`} className="gap-2 overflow-hidden">
+    <PageShell screenKey="matchSDG" className="gap-2 overflow-hidden">
       <GameHeader
         title="Ποιος SDG ταιριάζει;"
         onHome={onHome}

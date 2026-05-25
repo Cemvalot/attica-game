@@ -2,11 +2,7 @@ import { useEffect } from 'react';
 import { CheckCircle2, Home, Sparkles } from 'lucide-react';
 import { APP_COPY, MENU_GAMES } from '../data/games';
 import GameImage from '../assets/images/GameImage';
-import {
-  preloadAllGameChunks,
-  preloadMenuImages,
-  warmGameForPlay,
-} from '../utils/preloadGameAssets';
+import { preloadMenuImages, warmGameForPlay } from '../utils/preloadGameAssets';
 import PageShell from './PageShell';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -21,7 +17,6 @@ export default function GameMenu({ onSelectGame, onHome, completedGames, totalRo
 
   useEffect(() => {
     void preloadMenuImages();
-    void preloadAllGameChunks();
   }, []);
 
   const handleSelectGame = (gameId) => {

@@ -1,14 +1,35 @@
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { getSdgIconUrl } from './sdgAssets';
+import { getSdgIconUrl, preloadSdgIcon } from './sdgAssets';
 
 export default function SdgIcon({ sdgId, className, alt }) {
-  const src = getSdgIconUrl(sdgId);
+  const [src, setSrc] = useState(() => getSdgIconUrl(sdgId));
+
+  useEffect(() => {
+    let cancelled = false;
+    const cached = getSdgIconUrl(sdgId);
+    if (cached) {
+      setSrc(cached);
+      return undefined;
+    }
+    preloadSdgIcon(sdgId).then((url) => {
+      if (!cancelled) setSrc(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [sdgId]);
 
   if (!src) {
-    if (import.meta.env.DEV) {
-      console.warn(`[SdgIcon] Missing SDG asset: ${sdgId}`);
-    }
-    return null;
+    return (
+      <div
+        className={cn(
+          'h-full w-full animate-pulse rounded-lg bg-emerald-100/70',
+          className
+        )}
+        aria-hidden
+      />
+    );
   }
 
   return (

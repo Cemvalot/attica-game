@@ -1,4 +1,5 @@
 import { preloadGameImage } from '../assets/images/GameImage';
+import { preloadSdgIcons } from '../assets/sdgs/sdgAssets';
 import { sdgImageKey } from '../assets/images/imageMap';
 import {
   CONNECT_GAME,
@@ -28,6 +29,17 @@ function imageKeysForGame(gameId) {
   }
 }
 
+function sdgIdsForGame(gameId) {
+  switch (gameId) {
+    case 'connectSDG':
+      return CONNECT_GAME.levels.flatMap((level) => level.pairs.map((p) => p.sdgId));
+    case 'matchSDG':
+      return MATCH_GAME.levels.flatMap((level) => level.scene.optionSdgIds);
+    default:
+      return [];
+  }
+}
+
 export function preloadMenuImages() {
   return Promise.all(MENU_GAMES.map((g) => preloadGameImage(g.image)));
 }
@@ -39,11 +51,10 @@ export function preloadGameChunk(gameId) {
 
 export function preloadGameImages(gameId) {
   const keys = [...new Set(imageKeysForGame(gameId))];
-  return Promise.all(keys.map((key) => preloadGameImage(key)));
-}
-
-export function preloadAllGameChunks() {
-  return Promise.all(Object.values(chunkLoaders).map((load) => load()));
+  return Promise.all([
+    ...keys.map((key) => preloadGameImage(key)),
+    preloadSdgIcons(sdgIdsForGame(gameId)),
+  ]);
 }
 
 export function warmGameForPlay(gameId) {

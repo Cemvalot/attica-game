@@ -11,7 +11,7 @@ import InstructionsModal from './components/InstructionsModal';
 import GameMenu from './components/GameMenu';
 import FinalScreen from './components/FinalScreen';
 import KioskViewport from './components/KioskViewport';
-import { preloadAllGameChunks, preloadMenuImages } from './utils/preloadGameAssets';
+import { preloadMenuImages } from './utils/preloadGameAssets';
 
 const GameConnectSDG = lazy(() => import('./components/games/GameConnectSDG'));
 const GameMatchSDG = lazy(() => import('./components/games/GameMatchSDG'));
@@ -59,7 +59,6 @@ export default function App() {
   const goHome = () => startTransition(() => setScreen(SCREENS.home));
   const goMenu = () => {
     void preloadMenuImages();
-    void preloadAllGameChunks();
     startTransition(() => setScreen(SCREENS.menu));
   };
 
