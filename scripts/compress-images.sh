@@ -2,6 +2,7 @@
 # Συμπίεση εικόνων για kiosk (macOS sips).
 #   npm run compress:images       — όλα τα JPG (max 1400px)
 #   npm run compress:images:menu  — menu cards + logo (πιο επιθετικό)
+#   npm run compress:images:eco   — νέες eco κάρτες (max 1200px, quality 72)
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/../src/assets/images" && pwd)"
@@ -20,7 +21,12 @@ compress_jpg() {
   printf '%s  %s → %s\n' "$(basename "$f")" "$(numfmt --to=iec-i --suffix=B "$before" 2>/dev/null || echo "${before}B")" "$(numfmt --to=iec-i --suffix=B "$after" 2>/dev/null || echo "${after}B")"
 }
 
-if [ "$TARGET" = "menu" ]; then
+if [ "$TARGET" = "eco" ]; then
+  echo "Compressing Eco Speed images in $DIR (max 1200px, quality 72)…"
+  for name in eco-forest-trash.jpg eco-reusable-bags.jpg eco-solar-energy.jpg eco-rechargeable-batteries.jpg; do
+    [ -f "$DIR/$name" ] && compress_jpg "$DIR/$name" 1200 72
+  done
+elif [ "$TARGET" = "menu" ]; then
   echo "Compressing menu images in $DIR (max 1024px, quality 72)…"
   for name in menu-connect.jpg menu-match.jpg menu-eco-speed.jpg; do
     compress_jpg "$DIR/$name" 1024 72

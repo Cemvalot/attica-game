@@ -281,6 +281,15 @@ export const ECO_SPEED_GAME = {
     { id: 6, label: 'Βρύση που τρέχει άσκοπα', image: 'eco-running-tap', isGood: false },
     { id: 7, label: 'Παιδιά φυτεύουν δέντρο', image: 'eco-planting-tree', isGood: true },
     { id: 8, label: 'Καπνός από αυτοκίνητα', image: 'eco-car-pollution', isGood: false },
+    { id: 9, label: 'Πετάμε σκουπίδια στο δάσος', image: 'eco-forest-trash', isGood: false },
+    {
+      id: 10,
+      label: 'Χρησιμοποιούμε σακούλες πολλαπλών χρήσεων στο σούπερ μάρκετ',
+      image: 'eco-reusable-bags',
+      isGood: true,
+    },
+    { id: 11, label: 'Χρησιμοποιούμε ηλιακή ενέργεια', image: 'eco-solar-energy', isGood: true },
+    { id: 12, label: 'Χρησιμοποιούμε επαναφορτιζόμενες μπαταρίες', image: 'eco-rechargeable-batteries', isGood: true },
   ],
 };
 
@@ -315,7 +324,7 @@ export const INSTRUCTIONS = [
   {
     title: 'Eco Speed Challenge',
     lines: [
-      '2 λεπτά!',
+      '2 λεπτά — 12 διαφορετικές καταστάσεις!',
       'Απόφασε γρήγορα: καλό ή όχι για τον πλανήτη.',
       'Σε λάθος απάντηση προχωράς στην επόμενη κάρτα.',
       'Όσο πιο γρήγορα, τόσο καλύτερα!',

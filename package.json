@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview --host",
     "compress:images": "bash scripts/compress-images.sh",
-    "compress:images:menu": "bash scripts/compress-images.sh menu"
+    "compress:images:menu": "bash scripts/compress-images.sh menu",
+    "compress:images:eco": "bash scripts/compress-images.sh eco"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

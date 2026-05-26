@@ -188,7 +188,7 @@ export default function GameEcoSpeed({ onComplete, onHome }) {
         <GameHeader title="Eco Speed Challenge" onHome={onHome} />
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
           <HourglassIntro />
-          <h3 className="font-display text-3xl font-extrabold text-sky-700">2 λεπτά!</h3>
+          <h3 className="font-display text-3xl font-extrabold text-sky-700">2 λεπτά · 12 κάρτες</h3>
           <p className="max-w-sm text-lg font-bold text-emerald-800">
             Απόφασε γρήγορα: καλό ή όχι για τον πλανήτη;
           </p>

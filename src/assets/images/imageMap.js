@@ -43,4 +43,8 @@ export const IMAGE_MAP = {
   'eco-running-tap': 'eco-running-tap.jpg',
   'eco-planting-tree': 'eco-planting-tree.jpg',
   'eco-car-pollution': 'eco-car-pollution.jpg',
+  'eco-forest-trash': 'eco-forest-trash.jpg',
+  'eco-reusable-bags': 'eco-reusable-bags.jpg',
+  'eco-solar-energy': 'eco-solar-energy.jpg',
+  'eco-rechargeable-batteries': 'eco-rechargeable-batteries.jpg',
 };
