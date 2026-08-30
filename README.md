@@ -1,53 +1,38 @@
-# Attica Expo – Sustainability Games
+# attica-game
 
-Tablet-first interactive sustainability kiosk for primary school children (Greek UI). Three mini-games (~3–5 minutes), no backend, Vercel-ready.
+Interactive React educational game about Sustainable Development Goals (SDGs)
 
-## Run locally
+## Overview
 
-```bash
-npm install
-npm run dev          # LAN: http://<your-ip>:5173
-npm run dev:local    # localhost only
-```
+- **Language:** JavaScript
+- **Framework:** React, Vite, Tailwind CSS
+- **Features:**
+- Responsive design
+- Animations
+- Dashboard/UI
+- Configuration management
+- Proper .gitignore
+- Testing framework
 
-## Build & deploy
+## Installation
 
-```bash
-npm run build
-npm run preview -- --host
-```
+## Installation
 
-Deploy on Vercel: preset **Vite**, output `dist`.
+1. Clone the repository
+2. `npm install`
+3. `npm run dev`
+4. Open http://localhost:5173
 
-## Games
+## Usage
 
-1. **Σύνδεσε τον SDG με τη δράση** — tap SDG, tap action, SVG connection lines, check answers  
-2. **Ποιος SDG ταιριάζει;** — match illustrated scenes to exact SDG sets  
-3. **Eco Speed Challenge** — 30s rapid good/bad decisions with flat SVG cards  
+### Usage
 
-## Scoring
+Play through interactive SDG-themed game levels. Learn about sustainability
+goals through interactive challenges and content.
 
-- Each game contributes **33.3%** of the total  
-- Final score rounded to nearest **10** (e.g. 67% → 70%)  
-- Badges: **Eco Explorer** (0–30), **Planet Protector** (40–70), **Eco Hero** (80–100)  
+## License
 
-## Structure
+No license file — add one before publishing
 
-```
-src/
-  App.jsx
-  data/games.js, sdgs.js
-  assets/images/          # game photos (see images/README.md)
-  components/
-    HomeScreen, GameMenu, FinalScreen, …
-    games/GameConnectSDG, GameMatchSDG, GameEcoSpeed
-  hooks/useInactivity.js, useGameExit.js, useConnectionLines.js
-```
-
-## Customize
-
-- Add JPG/PNG/WebP files under `src/assets/images/` (names in `imageMap.js`)  
-- Add official UN SDG icons under `public/sdg/`  
-- Edit copy and game data in `src/data/games.js`  
-
-Kiosk: games 1–2 stay on screen until the player exits; game 3 ends when its timer runs out.
+---
+*Auto-generated README*
